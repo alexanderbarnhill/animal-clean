@@ -1,11 +1,12 @@
 data:
-  data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
-  noise_sources:
-    train:
-    val:
-    test:
-  working_directory:
-  cache_directory:
+  local:
+    data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
+    noise_sources:
+      train:
+      val:
+      test:
+    working_directory:
+    cache_directory:
 
 training:
   max_epochs: 100

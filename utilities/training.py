@@ -46,6 +46,7 @@ def get_audio_files(input_data, data_dir):
 
 
 def get_data_loaders(opts, loc="local"):
+    log.info(f"Location Information: {loc}")
     if "data_directory" in opts.data:
         data_dir = opts.data.data_directory
     else:

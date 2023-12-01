@@ -1,0 +1,6 @@
+monitoring:
+  method: wandb
+
+monitoring_methods:
+  wandb:
+    project: animal-clean

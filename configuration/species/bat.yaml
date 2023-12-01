@@ -1,0 +1,80 @@
+data:
+  local:
+    data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
+    noise_sources:
+      train:
+      val:
+      test:
+    working_directory:
+    cache_directory:
+
+  cluster:
+    data_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/signal"
+    noise_sources:
+      train: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/noise/train"
+      val: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/noise/val"
+      test: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/noise/test"
+    working_directory:
+    cache_directory:
+
+dataset:
+  sample_rate: 44100
+  pre_emphasis: 0.98
+
+  min_level_db: -100
+  ref_level_db: 20
+
+  frequency:
+    compression: linear      # Method of Frequency Compression. (linear, mel, mfcc)
+    frequency_min: 500       # Default is 500Hz
+    frequency_max: 10000     # Default is 10kHz
+
+  augmentation:              # Settings for Augmentation
+    active: true             # Should Augmentation Be Used (Default: True)
+
+    amplitude_shift:         # Alter amplitude in a specified range
+      active: true
+      increase_db: 3
+      decrease_db: -6
+
+    time_stretch:            # Stretch a signal by a factor randomly selected in a given range (e.g. 0.5 will halve the signal)
+      active: true
+      from: 0.5
+      to: 2
+
+    pitch_shift:             # Shift the pitch by a factor randomly selected from within a given range
+      active: true
+      from: 0.5
+      to: 1.5
+
+    noise_addition: # Add noise from given noise files with an SNR randomly selected from a given range
+      active: true
+      min_snr: -2
+      max_snr: -8
+
+    noise_masking:
+      df: 15.0
+      exp_e: 0.1
+      bin_pow: 2.0
+      gauss_mean: 0.0
+      gauss_std: 12.5
+      poisson_lambda: 15.0
+      original_noise_value: -5
+
+
+  feature_size:
+    n_freq_bins: 256         # Number of frequency bins (Default = 256)
+    sequence_length: 128     # Sequence Length (Default = 128)
+
+  fft:
+    n_fft: 4096              # FFT Size (Default 4096)
+    hop: 441                 # FFT Hop (Default 441)
+
+  normalization:
+    method: min_max
+
+  signal_detection:          # Use a peak finding mechanism to detect the strongest signal (see: https://github.com/ChristianBergler/ORCA-CLEAN)
+    active: true
+    perc_of_max_signal: 1.0
+    min_thres_detect: 0.05
+    max_thres_detect: 0.40

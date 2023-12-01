@@ -1,0 +1,5 @@
+scheduling:
+  patience: 10
+  threshold: 0.5
+  factor: 0.5
+  monitor: "val_loss"

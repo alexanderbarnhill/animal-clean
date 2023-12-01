@@ -55,6 +55,7 @@ def get_data_loaders(opts, loc="local"):
             data_dir = opts.data.data_directory
     if data_dir is None:
         raise ValueError(f"Data directory could not be found!")
+    log.info(f"Looking for data in {data_dir}")
     split_fracs = {"train": .7, "val": .15, "test": .15}
     input_data = DatabaseCsvSplit(
         split_fracs, working_dir=data_dir, split_per_dir=True

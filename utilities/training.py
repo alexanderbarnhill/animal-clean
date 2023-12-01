@@ -67,10 +67,11 @@ def get_data_loaders(opts, loc="local"):
 
     datasets = {
         split: Dataset(
+            split=split,
             opts=opts,
             file_names=input_data.load(split, audio_files),
             augmentation=augmentation if split == "train" else False,
-            noise_files=get_audio_files_from_dir(opts.data.noise_sources[split]),
+            noise_files=get_audio_files_from_dir(opts.data[loc].noise_sources[split]),
             loc=loc
 
         )

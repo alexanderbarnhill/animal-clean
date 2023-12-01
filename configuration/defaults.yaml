@@ -1,6 +1,6 @@
 data:
   local:
-    data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
+    data_directory: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"
     noise_sources:
       train:
       val:
@@ -15,7 +15,7 @@ training:
   batch_size: 16
   num_workers: 0
 
-  training_directory: "/cluster/barnhill/training/animal-clean"
+  training_directory:
   gpu: false
   enable_checkpointing: true
 

@@ -139,7 +139,6 @@ class CsvSplit(object):
     in case there exist not a split yet generate a new CSV split
     """
     def load(self, split: str, files: List[Any] = None):
-
         if split not in self.split_fracs:
             raise ValueError(
                 "Provided split '{}' is not in `self.split_fracs`.".format(split)
@@ -151,6 +150,7 @@ class CsvSplit(object):
             self.splits = self._split_with_seed(files)
             return self.splits[split]
         if self.can_load_from_csv():
+            log.info(f"Loading from CSV")
             if not self.split_per_dir:
                 csv_split_files = {
                     split_: (os.path.join(self.working_dir, split_ + ".csv"),)
@@ -170,9 +170,12 @@ class CsvSplit(object):
                     if not csv_file or csv_file.startswith(r"#"):
                         continue
                     csv_file_path = os.path.join(self.working_dir, csv_file)
+                    log.info(f"Looking in {csv_file_path}")
                     with open(csv_file_path, "r") as f:
                         reader = csv.reader(f)
                         for item in reader:
+                            if len(item) != 1:
+                                continue
                             file_ = os.path.basename(item[0])
                             file_ = os.path.join(os.path.dirname(csv_file), file_)
                             self.splits[split_].append(file_)
@@ -445,6 +448,7 @@ class Dataset(AudioDataset):
     """
     def __init__(
         self,
+        split,
         opts,
         augmentation,
         file_names: Iterable[str],
@@ -453,6 +457,7 @@ class Dataset(AudioDataset):
         *args,
         **kwargs
     ):
+        log.info(f"{split} -- {len(file_names)} files")
         dataset_opts = opts.dataset
         data_opts = opts.data
         if loc is None or loc not in data_opts:

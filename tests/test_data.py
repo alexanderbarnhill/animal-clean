@@ -13,7 +13,7 @@ def test_get_data_loaders():
 
 
 def test_loaders_not_empty():
-    configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=ORCA)
+    configuration = build_configuration(defaults_path=CONFIGURATION_BASE)
     loaders = get_data_loaders(configuration)
     train_loader = loaders["train"]
     val_loader = loaders["val"]

@@ -458,6 +458,10 @@ class Dataset(AudioDataset):
         **kwargs
     ):
         log.info(f"{split} -- {len(file_names)} files")
+        if noise_files is not None:
+            log.info(f"{split} -- {len(noise_files)} noise files")
+        else:
+            log.info(f"No noise files found.")
         dataset_opts = opts.dataset
         data_opts = opts.data
         if loc is None or loc not in data_opts:
@@ -548,7 +552,7 @@ class Dataset(AudioDataset):
         else:
             raise "Undefined frequency compression"
 
-        if self.augmentation and self.noise_files:
+        if self.augmentation and self.noise_files is not None and len(self.noise_files) > 0:
             log.debug("Init training real-world noise files for noise2noise adding")
             self.t_addnoise = T.RandomAddNoise(
                 self.noise_files,
@@ -634,7 +638,7 @@ class Dataset(AudioDataset):
         ground_truth = self.t_norm(ground_truth)
 
         # ARTF PART
-        min_dist = 0 if len(self.noise_files) > 0 else 1
+        min_dist = 0 if len(self.noise_files) > 0 and self.t_addnoise is not None else 1
         distribution_idx = random.randint(min_dist, 9)
 
         if distribution_idx != 0:

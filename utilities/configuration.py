@@ -4,7 +4,7 @@ from omegaconf import OmegaConf
 import os
 
 
-def get_configuration(configuration_base: str | List[str] | Tuple[str]):
+def get_configuration(configuration_base):
     if isinstance(configuration_base, str) and os.path.isfile(configuration_base):
         log.info(f"Loading configuration file {configuration_base}")
         return OmegaConf.load(configuration_base)

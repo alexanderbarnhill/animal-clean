@@ -452,12 +452,18 @@ class Dataset(AudioDataset):
         opts,
         augmentation,
         file_names: Iterable[str],
-        noise_files: List[str] = [],
+        noise_directory: str,
         loc=None,
         *args,
         **kwargs
     ):
         log.info(f"{split} -- {len(file_names)} files")
+        if noise_directory is not None:
+            log.info(f"Looking for noise files in {noise_directory}")
+            noise_files = glob.glob(noise_directory + f"{os.sep}**{os.sep}.wav", recursive=True)
+        else:
+            log.info(f"No noise directory defined. Not using real world noise")
+            noise_files = None
         if noise_files is not None:
             log.info(f"{split} -- {len(noise_files)} noise files")
         else:

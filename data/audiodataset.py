@@ -58,7 +58,7 @@ def get_audio_files_from_dir(path: str):
     audio_files = map(lambda p: pathlib.Path(p), audio_files)
     audio_files = filter(lambda p: not p.match("*.bkp/*"), audio_files)
     base = pathlib.Path(path)
-    return map(lambda p: str(p.relative_to(base)), audio_files)
+    return list(map(lambda p: str(p.relative_to(base)), audio_files))
 
 """
 Helper class in order to speed up filtering potential broken files

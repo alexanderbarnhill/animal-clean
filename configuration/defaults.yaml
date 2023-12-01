@@ -2,7 +2,7 @@ data:
   local:
     data_directory: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"
     noise_sources:
-      train:
+      train: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"
       val:
       test:
     working_directory:

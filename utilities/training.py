@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from data.audiodataset import DatabaseCsvSplit, get_audio_files_from_dir, Dataset
 import logging as log
 import torch
-
+from glob import glob
 
 def get_training_directory(opts):
     if opts.training.training_directory is None:
@@ -71,7 +71,7 @@ def get_data_loaders(opts, loc="local"):
             opts=opts,
             file_names=input_data.load(split, audio_files),
             augmentation=augmentation if split == "train" else False,
-            noise_files=get_audio_files_from_dir(opts.data[loc].noise_sources[split]),
+            noise_files=glob(opts.data[loc].noise_sources[split] + f"{os.sep}**{os.sep}.wav", recursive=True),
             loc=loc
 
         )

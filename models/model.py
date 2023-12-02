@@ -65,7 +65,7 @@ class AnimalClean(pl.LightningModule):
 
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "train")
-        self._set_samples(x, ground_truth,"train")
+        self._set_samples(x, ground_truth, "train")
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -85,7 +85,7 @@ class AnimalClean(pl.LightningModule):
         loss = self.criterion(output, ground_truth)
         self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "test")
-        self._set_samples(x, ground_truth,"test")
+        self._set_samples(x, ground_truth, "test")
         return loss
 
     def _log_samples(self, phase):

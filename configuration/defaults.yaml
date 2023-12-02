@@ -2,9 +2,9 @@ data:
   local:
     data_directory: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"
     noise_sources:
-      train: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"
-      val:
-      test:
+      train: "/home/alex/data/animal-clean/training/data/orca/noise/train"
+      val: "/home/alex/data/animal-clean/training/data/orca/noise/val"
+      test: "/home/alex/data/animal-clean/training/data/orca/noise/test"
     working_directory:
     cache_directory:
 

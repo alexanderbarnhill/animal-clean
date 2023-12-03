@@ -581,7 +581,7 @@ class Dataset(AudioDataset):
         else:
             self.t_norm = T.Normalize(
                 min_level_db=dataset_opts.min_level_db,
-                ref_level_db=dataset_opts.max_level_db,
+                ref_level_db=dataset_opts.ref_level_db,
             )
             log.debug("Init 0/1-dB-normalization activated")
 

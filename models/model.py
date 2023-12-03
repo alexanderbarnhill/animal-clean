@@ -143,5 +143,4 @@ class AnimalClean(pl.LightningModule):
     def on_validation_epoch_end(self) -> None:
         self._log_samples("val")
         self.epoch += 1
-        self._initialize_samples()
 

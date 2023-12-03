@@ -109,8 +109,13 @@ class AnimalClean(pl.LightningModule):
             logger.add_images(f"{phase}/Output", samples["output"], self.epoch, dataformats="NCHW")
 
     def _set_samples(self, input_samples, output_samples, phase):
-        self.samples[phase]["input"] = input_samples
-        self.samples[phase]["output"] = output_samples
+        if self.samples is None or phase not in self.samples or "input" not in self.samples[phase]:
+            self._initialize_samples()
+
+        if self.samples[phase]["input"] is None:
+            self.samples[phase]["input"] = input_samples
+        if self.samples[phase]["output"] is None:
+            self.samples[phase]["output"] = output_samples
 
     def _initialize_samples(self):
         log.info(f"Initializing Sample dict")

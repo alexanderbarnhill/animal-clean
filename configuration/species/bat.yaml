@@ -1,3 +1,7 @@
+### Bat (Pygmy pipistrelle) Settings
+### Taken from ANIMAL-SPOT Supplementary Material Table 2
+###
+
 data:
   local:
     data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
@@ -18,16 +22,16 @@ data:
     cache_directory:
 
 dataset:
-  sample_rate: 44100
+  sample_rate: 256000
   pre_emphasis: 0.98
 
   min_level_db: -100
-  ref_level_db: 20
+  ref_level_db: 0
 
   frequency:
     compression: linear      # Method of Frequency Compression. (linear, mel, mfcc)
-    frequency_min: 500       # Default is 500Hz
-    frequency_max: 10000     # Default is 10kHz
+    frequency_min: 40000       # Default is 500Hz
+    frequency_max: 100000     # Default is 10kHz
 
   augmentation:              # Settings for Augmentation
     active: true             # Should Augmentation Be Used (Default: True)
@@ -67,11 +71,11 @@ dataset:
     sequence_length: 128     # Sequence Length (Default = 128)
 
   fft:
-    n_fft: 4096              # FFT Size (Default 4096)
-    hop: 441                 # FFT Hop (Default 441)
+    n_fft: 256              # FFT Size (Default 4096)
+    hop: 8                 # FFT Hop (Default 441)
 
   normalization:
-    method: min_max
+    method: db
 
   signal_detection:          # Use a peak finding mechanism to detect the strongest signal (see: https://github.com/ChristianBergler/ORCA-CLEAN)
     active: true

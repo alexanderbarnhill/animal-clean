@@ -1,3 +1,7 @@
+### Killer Whale Settings
+### Taken from ANIMAL-SPOT Supplementary Material Table 2
+###
+
 data:
   local:
     data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
@@ -72,7 +76,7 @@ dataset:
     hop: 441                 # FFT Hop (Default 441)
 
   normalization:
-    method: min_max
+    method: db
 
   signal_detection:          # Use a peak finding mechanism to detect the strongest signal (see: https://github.com/ChristianBergler/ORCA-CLEAN)
     active: true

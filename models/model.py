@@ -91,6 +91,7 @@ class AnimalClean(pl.LightningModule):
     def _log_samples(self, phase):
         samples = self.samples[phase]
         logger = self.logger
+        log.info(f"Samples: {samples}")
         if self.opts.monitoring.method == "wandb":
             i = []
             for img_idx in range(samples["input"].shape[0]):
@@ -108,14 +109,11 @@ class AnimalClean(pl.LightningModule):
             logger.add_images(f"{phase}/Output", samples["output"], self.epoch, dataformats="NCHW")
 
     def _set_samples(self, input_samples, output_samples, phase):
-        if self.samples is None:
-            self._initialize_samples()
-        if self.samples[phase]["input"] is None:
-            self.samples[phase]["input"] = input_samples
-        if self.samples[phase]["output"] is None:
-            self.samples[phase]["output"] = output_samples
+        self.samples[phase]["input"] = input_samples
+        self.samples[phase]["output"] = output_samples
 
     def _initialize_samples(self):
+        log.info(f"Initializing Sample dict")
         data = {}
         for phase in ["train", "val", "test"]:
             data[phase] = {

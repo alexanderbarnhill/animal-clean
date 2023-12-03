@@ -1,3 +1,7 @@
+### Computational Paralinguistics Challenge Primate (ComParE PRS) Settings
+### Taken from ANIMAL-SPOT Supplementary Material Table 2
+###
+
 data:
   local:
     data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
@@ -27,8 +31,8 @@ dataset:
 
   frequency:
     compression: linear      # Method of Frequency Compression. (linear, mel, mfcc)
-    frequency_min: 500       # Default is 500Hz
-    frequency_max: 10000     # Default is 10kHz
+    frequency_min: 10       # Default is 500Hz
+    frequency_max: 4000     # Default is 10kHz
 
   augmentation:              # Settings for Augmentation
     active: true             # Should Augmentation Be Used (Default: True)
@@ -69,7 +73,7 @@ dataset:
 
   fft:
     n_fft: 2048              # FFT Size (Default 4096)
-    hop: 220                 # FFT Hop (Default 441)
+    hop: 137                 # FFT Hop (Default 441)
 
   normalization:
     method: min_max

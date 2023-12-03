@@ -1,3 +1,7 @@
+### Warbler Settings
+### Taken from ANIMAL-SPOT Supplementary Material Table 2
+###
+
 data:
   local:
     data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"

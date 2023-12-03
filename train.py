@@ -72,7 +72,7 @@ if __name__ == '__main__':
         callbacks=get_callbacks(configuration),
         enable_checkpointing=configuration.training.enable_checkpointing,
         strategy="ddp",
-        limit_train_batches=1.0 if not configuration.training.debug.active else configuration.training.debug.limit_train_batch
+        limit_train_batches=1.0 if not configuration.training.debugging.active else configuration.training.debugging.limit_train_batch
     )
 
     in_slurm = "SLURM_JOB_ID" in os.environ

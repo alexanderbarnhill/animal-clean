@@ -91,6 +91,10 @@ class AnimalClean(pl.LightningModule):
     def _log_samples(self, phase):
         samples = self.samples[phase]
         logger = self.logger
+        if samples is None:
+            log.info(f"Samples have not been set for phase {phase}")
+            return
+
         if self.opts.monitoring.method == "wandb":
             i = []
             for img_idx in range(samples["input"].shape[0]):

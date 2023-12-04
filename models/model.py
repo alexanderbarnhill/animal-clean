@@ -65,7 +65,7 @@ class AnimalClean(pl.LightningModule):
 
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "train")
-        self._set_samples(x, ground_truth, "train")
+        self._set_samples(x, ground_truth, output, "train")
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -75,7 +75,7 @@ class AnimalClean(pl.LightningModule):
         loss = self.criterion(output, ground_truth)
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "val")
-        self._set_samples(x, ground_truth, "val")
+        self._set_samples(x, ground_truth, output, "val")
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -85,7 +85,7 @@ class AnimalClean(pl.LightningModule):
         loss = self.criterion(output, ground_truth)
         self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "test")
-        self._set_samples(x, ground_truth, "test")
+        self._set_samples(x, ground_truth, output, "test")
         return loss
 
     def _log_samples(self, phase):
@@ -104,19 +104,27 @@ class AnimalClean(pl.LightningModule):
             i = []
             for img_idx in range(samples["output"].shape[0]):
                 i.append(samples["output"][img_idx])
-            logger.log_image(f"{phase}/output", i, self.epoch)
+            logger.log_image(f"{phase}/Denoised Output", i, self.epoch)
+
+            i = []
+            for img_idx in range(samples["ground_truth"].shape[0]):
+                i.append(samples["ground_truth"][img_idx])
+            logger.log_image(f"{phase}/Ground Truth", i, self.epoch)
 
         else:
             logger = logger.experiment
             logger.add_images(f"{phase}/Input", samples["input"], self.epoch, dataformats="NCHW")
-            logger.add_images(f"{phase}/Output", samples["output"], self.epoch, dataformats="NCHW")
+            logger.add_images(f"{phase}/Denoised Output", samples["output"], self.epoch, dataformats="NCHW")
+            logger.add_images(f"{phase}/Ground Truth", samples["ground_truth"], self.epoch, dataformats="NCHW")
 
-    def _set_samples(self, input_samples, output_samples, phase):
+    def _set_samples(self, features, ground_truth, output_samples, phase):
         if self.samples is None or phase not in self.samples or "input" not in self.samples[phase]:
             self._initialize_samples()
 
         if self.samples[phase]["input"] is None:
-            self.samples[phase]["input"] = input_samples
+            self.samples[phase]["input"] = features
+        if self.samples[phase]["ground_truth"] is None:
+            self.samples[phase]["ground_truth"] = ground_truth
         if self.samples[phase]["output"] is None:
             self.samples[phase]["output"] = output_samples
 
@@ -126,7 +134,8 @@ class AnimalClean(pl.LightningModule):
         for phase in ["train", "val", "test"]:
             data[phase] = {
                 "input": None,
-                "output": None
+                "output": None,
+                "ground_truth": None
             }
 
         self.samples = data

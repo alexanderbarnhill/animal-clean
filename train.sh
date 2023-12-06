@@ -25,7 +25,7 @@ configuration_directory=$source_dir/configuration
 species_configuration_directory=$configuration_directory/species
 species_configuration_file=$species_configuration_directory/$config_file
 
-venv_directory=$source_dir/venv
+venv_directory=/cluster/barnhill/code/animal-vae/venv
 export CUDA_VISIBLE_DEVICES=0,1
 export https_proxy="http://proxy.rrze.uni-erlangen.de:80"
 
@@ -37,7 +37,7 @@ then
 
 fi
 
-source $source_dir/venv/bin/activate
+source $venv_directory/bin/activate
 cd $source_dir || exit
 
 echo "Installing requirements"

@@ -56,7 +56,7 @@ if __name__ == '__main__':
     log.info(f"Initializing Logger")
     logger = None
     if configuration.monitoring.method.lower() == "wandb":
-        wandb.login(key=configuration.secrets.monitoring.wandb.api_key)
+        # wandb.login(key=configuration.secrets.monitoring.wandb.api_key)
         logger = pl_loggers.WandbLogger(project=configuration.monitoring_methods.wandb.project, log_model="all",
                                         save_dir=training_directory)
 

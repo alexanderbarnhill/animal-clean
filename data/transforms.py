@@ -460,24 +460,25 @@ class Interpolate(object):
 
 """Frequency decompression of a given frequency range into a chosen number of frequency bins (important for reconstruction of the cmplx spectrogram)."""
 class Decompress(object):
-    def __init__(self, f_min=500, f_max=12500, n_fft=4096, sr=44100):
+    def __init__(self, f_min=500, f_max=12500, n_fft=4096, sr=44100, device=torch.cpu):
         self.sr = sr
         self.n_fft = n_fft
         self.f_min = f_min
         self.f_max = f_max
+        self.device = device
 
     def __call__(self, spectrogram):
         min_bin = int(max(0, math.floor(self.n_fft * self.f_min / self.sr)))
         max_bin = int(min(self.n_fft - 1, math.ceil(self.n_fft * self.f_max / self.sr)))
 
         spec = F.interpolate(spectrogram, size=(spectrogram.size(2), max_bin - min_bin), mode="nearest").squeeze(dim=0)
-        lower_spec = torch.zeros([1, spectrogram.size(2), min_bin])
-        upper_spec = torch.zeros([1, spectrogram.size(2), (self.n_fft // 2 + 1) - max_bin])
+        lower_spec = torch.zeros([1, spectrogram.size(2), min_bin]).to(self.device)
+        upper_spec = torch.zeros([1, spectrogram.size(2), (self.n_fft // 2 + 1) - max_bin]).to(self.device)
 
         final_spec = torch.cat((lower_spec, spec), 2)
         final_spec = torch.cat((final_spec, upper_spec), 2)
 
-        return final_spec
+        return final_spec.to(self.device)
 
 
 """Convert hertz to mel."""

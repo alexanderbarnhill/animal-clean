@@ -1,0 +1,16 @@
+cuda: true
+batch_size: 1
+num_workers: 0
+visualization:
+  active: true
+  separate_img: true
+  split_in_out: true
+  img_out:
+
+visualize: true
+input: "/home/alex/data/animal-clean/training/data/warbler/signal"
+output: "/home/alex/data/animal-clean/training/data/warbler/signal-denoised"
+maintain_directory_structure: true
+file_ext:
+model_path: "/home/alex/data/model_storage/ANIMAL-CLEAN/warbler/v1/model.ckpt"
+sequence_length: 1.28

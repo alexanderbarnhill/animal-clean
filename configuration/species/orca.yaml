@@ -4,11 +4,11 @@
 
 data:
   local:
-    data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
+    data_directory: "/home/alex/data/animal-clean/training/data/denoising_training/orca/signal/AOEC"
     noise_sources:
-      train:
-      val:
-      test:
+      train: /home/alex/data/animal-clean/training/data/denoising_training/orca/noise/train
+      val: /home/alex/data/animal-clean/training/data/denoising_training/orca/noise/val
+      test: /home/alex/data/animal-clean/training/data/denoising_training/orca/noise/test
     working_directory:
     cache_directory:
 

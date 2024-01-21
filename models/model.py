@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import io
 from PIL import Image
 
+from utilities.viewing import convert_tensor_to_PIL
 
 
 class AnimalClean(pl.LightningModule):
@@ -92,24 +93,7 @@ class AnimalClean(pl.LightningModule):
         self._set_samples(x, ground_truth, output, "test")
         return loss
 
-    def _convert_tensor_to_PIL(self, image_tensor, transpose=True):
-        if image_tensor.shape[0] == 1:
-            image_tensor = image_tensor[0]
-        if transpose:
-            image_tensor = image_tensor.T
 
-        image_tensor = image_tensor.detach()
-        image_tensor = image_tensor.cpu()
-        image_tensor = image_tensor.numpy()
-
-        fig, ax = plt.subplots(dpi=60)
-        ax.imshow(image_tensor, origin="lower", interpolation=None)
-        buffer = io.BytesIO()
-        plt.savefig(buffer)
-        buffer.seek(0)
-        image = Image.open(buffer)
-        plt.close(fig)
-        return image
 
     def _log_samples(self, phase):
         samples = self.samples[phase]
@@ -122,21 +106,21 @@ class AnimalClean(pl.LightningModule):
             i = []
             for img_idx in range(samples["input"].shape[0]):
                 image_tensor = samples["input"][img_idx]
-                image = self._convert_tensor_to_PIL(image_tensor)
+                image = convert_tensor_to_PIL(image_tensor)
                 i.append(image)
             logger.log_image(f"{phase}/Input", i, self.epoch)
 
             i = []
             for img_idx in range(samples["output"].shape[0]):
                 image_tensor = samples["output"][img_idx]
-                image = self._convert_tensor_to_PIL(image_tensor)
+                image = convert_tensor_to_PIL(image_tensor)
                 i.append(image)
             logger.log_image(f"{phase}/Denoised Output", i, self.epoch)
 
             i = []
             for img_idx in range(samples["ground_truth"].shape[0]):
                 image_tensor = samples["ground_truth"][img_idx]
-                image = self._convert_tensor_to_PIL(image_tensor)
+                image = convert_tensor_to_PIL(image_tensor)
                 i.append(image)
             logger.log_image(f"{phase}/Ground Truth", i, self.epoch)
 

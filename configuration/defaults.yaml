@@ -24,7 +24,7 @@ training:
   num_workers: 0
 
   training_directory:
-  gpu: false
+  gpu: true
   enable_checkpointing: true
 
   early_stopping:

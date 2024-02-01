@@ -14,7 +14,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as tick
 
-matplotlib.use('Agg')
 
 
 from typing import Tuple

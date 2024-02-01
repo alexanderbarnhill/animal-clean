@@ -1,9 +1,10 @@
+import math
 import os
 
 from lightning.pytorch.callbacks import LearningRateMonitor, EarlyStopping, ModelCheckpoint
 from torch.utils.data import DataLoader
 
-from data.audiodataset import DatabaseCsvSplit, get_audio_files_from_dir, Dataset
+from data.audiodataset import DatabaseCsvSplit, get_audio_files_from_dir, Dataset, HumanSpeechBatchAugmentationDataset
 import logging as log
 import torch
 from glob import glob
@@ -44,6 +45,67 @@ def get_audio_files(input_data, data_dir):
             exit(1)
     return audio_files
 
+def get_human_speech_opts(opts, loc="local"):
+    if "human_speech" in opts.data:
+        clean_dir = opts.data.human_speech.clean
+        noisy_dir = opts.data.human_speech.noisy
+        batch_percentage = opts.data.human_speech.batch_percentage
+    else:
+        if loc in opts.data:
+            clean_dir = opts.data[loc].human_speech.clean
+            noisy_dir = opts.data[loc].human_speech.noisy
+            batch_percentage = opts.data[loc].human_speech.batch_percentage
+        else:
+            clean_dir = opts.data.human_speech.clean
+            noisy_dir = opts.data.human_speech.noisy
+            batch_percentage = opts.data.human_speech.batch_percentage
+    if clean_dir is None or noisy_dir is None:
+        return None, None, 0.0
+
+
+    return clean_dir, noisy_dir, batch_percentage
+def get_human_speech_loader(opts, loc="local"):
+    clean_dir, noisy_dir, batch_percentage = get_human_speech_opts(opts, loc)
+
+    log.info(f"Human speech augmentation during training is activated")
+    log.info(f"Trying to organize clean and noisy samples for human speech augmentation")
+    all_clean_files = glob(clean_dir + f"{os.sep}**{os.sep}*.wav", recursive=True)
+    all_noisy_files = glob(noisy_dir + f"{os.sep}**{os.sep}*.wav", recursive=True)
+    noisy_files_bases = [os.path.basename(f) for f in all_noisy_files]
+
+    clean_files = []
+    noisy_files = []
+    for file in all_clean_files:
+        if os.path.basename(file) in noisy_files_bases:
+            idx = noisy_files_bases.index(os.path.basename(file))
+            clean_files.append(file)
+            noisy_files.append(all_noisy_files[idx])
+    augmentation = opts.dataset.augmentation.active
+    dataset = HumanSpeechBatchAugmentationDataset(
+        split="train",
+        file_names=clean_files,
+        opts=opts,
+        augmentation=augmentation,
+        loc=loc,
+        noise_directory=None,
+    )
+    dataset.noisy_files = noisy_files
+
+    batch_size = int(math.floor(batch_percentage * opts.training.batch_size))
+    log.info(f"Training Batch Size for Human Speech Samples: {batch_size}")
+    loader = DataLoader(dataset=dataset,
+                        shuffle=True,
+                        batch_size=batch_size,
+                        num_workers=opts.training.num_workers)
+    return loader
+
+
+def use_human_speech_augmentation(opts, loc="local"):
+    clean, noisy, percentage = get_human_speech_opts(opts, loc)
+    if clean is not None and percentage > 0.0:
+        return True
+    return False
+
 
 def get_data_loaders(opts, loc="local"):
     log.info(f"Location Information: {loc}")
@@ -59,7 +121,7 @@ def get_data_loaders(opts, loc="local"):
     log.info(f"Looking for data in {data_dir}")
     split_fracs = {"train": .7, "val": .15, "test": .15}
     input_data = DatabaseCsvSplit(
-        split_fracs, working_dir=data_dir, split_per_dir=True
+        split_fracs, split_per_dir=True
     )
 
     audio_files = get_audio_files(input_data, data_dir)
@@ -78,10 +140,23 @@ def get_data_loaders(opts, loc="local"):
         for split in split_fracs.keys()
     }
 
+    _, _, batch_percentage = get_human_speech_opts(opts, loc)
+    if batch_percentage > 0.0:
+        train_batch_size = opts.training.batch_size - (int(math.floor(batch_percentage * opts.training.batch_size)))
+    else:
+        train_batch_size = opts.training.batch_size
+
+    log.info(f"Training Batch Size for Animal Samples: {train_batch_size}")
+    batch_sizes = {
+        "train": train_batch_size,
+        "val": opts.training.batch_size,
+        "test": opts.training.batch_size
+    }
+
     dataloaders = {
         split: DataLoader(
             datasets[split],
-            batch_size=opts.training.batch_size,
+            batch_size=batch_sizes[split],
             shuffle=True if split == "train" else False,
             num_workers=opts.training.num_workers
         )

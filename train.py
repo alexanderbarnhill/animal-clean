@@ -10,8 +10,8 @@ from lightning.pytorch import loggers as pl_loggers
 
 from models.model import AnimalClean
 from utilities.configuration import build_configuration
-from utilities.training import get_training_directory, get_callbacks, get_data_loaders
-import wandb
+from utilities.training import *
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--defaults", default=os.path.join(os.getcwd(), "configuration"))
 parser.add_argument("--species_configuration", default=None)
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     log.info("Initializing Model")
     model = AnimalClean(configuration)
 
+
     training_directory = get_training_directory(configuration)
     log.info(f"Putting relevant training output files in {training_directory}")
 
@@ -79,6 +80,11 @@ if __name__ == '__main__':
     if in_slurm:
         log.info(f"Using Cluster Data Configuration")
     location = "local" if not in_slurm else "cluster"
+
+    if use_human_speech_augmentation(configuration, loc=location):
+        model.use_human_speech_augmentation = True
+        model.human_speech_loader = get_human_speech_loader(configuration, loc=location)
+
     dataloaders = get_data_loaders(configuration, loc=location)
 
     log.info(f"Acquired data loaders")

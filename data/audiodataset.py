@@ -29,7 +29,7 @@ import logging as log
 from collections import defaultdict
 from utilities.FileIO import AsyncFileReader
 from typing import Any, Dict, Iterable, List
-
+import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 """
@@ -51,6 +51,8 @@ DefaultSpecDatasetOps = {
 """
 Get audio files from directory
 """
+
+
 def get_audio_files_from_dir(path: str):
     if path is None or len(path) == 0:
         return []
@@ -60,9 +62,12 @@ def get_audio_files_from_dir(path: str):
     base = pathlib.Path(path)
     return list(map(lambda p: str(p.relative_to(base)), audio_files))
 
+
 """
 Helper class in order to speed up filtering potential broken files
 """
+
+
 class _FilterPickleHelper(object):
     def __init__(self, predicate, *pred_args):
         self.predicate = predicate
@@ -71,9 +76,12 @@ class _FilterPickleHelper(object):
     def __call__(self, item):
         return self.predicate(item, *self.args)
 
+
 """
 Parallel Filtering to analyze incoming data files
 """
+
+
 class _ParallelFilter(object):
     def __init__(self, iteratable, n_threads=None, chunk_size=1):
         self.data = iteratable
@@ -87,9 +95,12 @@ class _ParallelFilter(object):
                 if keep:
                     yield c
 
+
 """
 Analyzing loudness criteria of each audio file by checking maximum amplitude (default: 1e-3)
 """
+
+
 def _loudness_criteria(file_name: str, working_dir: str = None):
     if working_dir is not None:
         file_path = os.path.join(working_dir, file_name)
@@ -102,9 +113,12 @@ def _loudness_criteria(file_name: str, working_dir: str = None):
     else:
         return False, None
 
+
 """
 Filtering all audio files in previous which do not fulfill the loudness criteria
 """
+
+
 def get_broken_audio_files(files: Iterable[str], working_dir: str = None):
     f = _ParallelFilter(files, chunk_size=100)
     return f(_loudness_criteria, working_dir)
@@ -117,14 +131,16 @@ The filenames per dataset will be stored in CSV files (train.csv, val.csv, test.
 a train, val, and test file holding the information how a single partition is made up from single CSV files. These three
 files reflects the training, validation, and test set.
 """
+
+
 class CsvSplit(object):
 
     def __init__(
-        self,
-        split_fracs: Dict[str, float],
-        working_dir: (str) = None,
-        seed: (int) = None,
-        split_per_dir=False,
+            self,
+            split_fracs: Dict[str, float],
+            working_dir: (str) = None,
+            seed: (int) = None,
+            split_per_dir=False,
     ):
         if not np.isclose(np.sum([p for _, p in split_fracs.items()]), 1.):
             raise ValueError("Split probabilities have to sum up to 1.")
@@ -138,6 +154,7 @@ class CsvSplit(object):
     Return split for given partition. If there is already an existing CSV split return this split if it is valid or
     in case there exist not a split yet generate a new CSV split
     """
+
     def load(self, split: str, files: List[Any] = None):
         if split not in self.split_fracs:
             raise ValueError(
@@ -213,6 +230,7 @@ class CsvSplit(object):
     """
     Check whether it is possible to correctly load information from existing csv files
     """
+
     def can_load_from_csv(self):
         if not self.working_dir:
             return False
@@ -244,6 +262,7 @@ class CsvSplit(object):
     """
     Create a mapping from directory to containing files.
     """
+
     def _get_f_d_map(self, files: List[Any]):
 
         f_d_map = defaultdict(list)
@@ -260,6 +279,7 @@ class CsvSplit(object):
     """
     Randomly splits the dataset using given seed
     """
+
     def _split_with_seed(self, files: List[Any]):
         if not files:
             raise ValueError("Provided list `files` is `None`.")
@@ -270,6 +290,7 @@ class CsvSplit(object):
     """
     A generator function that returns all values for the given `split`.
     """
+
     def split_fn(self, files: List[Any]):
         _splits = np.split(
             ary=random.sample(files, len(files)),
@@ -282,9 +303,12 @@ class CsvSplit(object):
             splits[key] = _splits[i]
         return splits
 
+
 """
 Extracts the year and tape from the given audio filename (filename structure: call-label_ID_YEAR_TAPE_STARTTIME_ENDTIME)
 """
+
+
 def get_tape_key(file, valid_years=None):
     while "__" in file:
         file = file.replace("__", "_")
@@ -305,12 +329,15 @@ def get_tape_key(file, valid_years=None):
 """
 Splits a given list of file names across different partitions.
 """
+
+
 class DatabaseCsvSplit(CsvSplit):
     valid_years = set(range(1950, 2200))
 
     """
     Count the samples per tape.
     """
+
     def split_fn(self, files: Iterable[Any]):
         if isinstance(files, GeneratorType):
             files = list(files)
@@ -332,6 +359,7 @@ class DatabaseCsvSplit(CsvSplit):
         """
         Helper class which creates a mapping (per fraction) in order to handle added tapes and number of files per tape
         """
+
         class Mapping:
             def __init__(self):
                 self.count = 0
@@ -365,18 +393,21 @@ class DatabaseCsvSplit(CsvSplit):
 
         return splits
 
+
 """
 Dataset for that returns just the provided file names.
 """
+
+
 class FileNameDataset(torch.utils.data.Dataset):
 
     def __init__(
-        self,
-        file_names: Iterable[str],
-        working_dir=None,
-        transform=None,
-        logger_name="TRAIN",
-        dataset_name=None,
+            self,
+            file_names: Iterable[str],
+            working_dir=None,
+            transform=None,
+            logger_name="TRAIN",
+            dataset_name=None,
     ):
         if isinstance(file_names, GeneratorType):
             self.file_names = list(file_names)
@@ -399,19 +430,22 @@ class FileNameDataset(torch.utils.data.Dataset):
             sample = self.transform(sample)
         return sample
 
+
 """
 Dataset for loading audio data.
 """
+
+
 class AudioDataset(FileNameDataset):
 
     def __init__(
-        self,
-        file_names: Iterable[str],
-        working_dir=None,
-        sr=44100,
-        mono=True,
-        *args,
-        **kwargs
+            self,
+            file_names: Iterable[str],
+            working_dir=None,
+            sr=44100,
+            mono=True,
+            *args,
+            **kwargs
     ):
         super().__init__(file_names, working_dir, *args, **kwargs)
 
@@ -427,6 +461,7 @@ class AudioDataset(FileNameDataset):
             sample = self.transform(sample)
         return sample
 
+
 """
 Dataset to load audio files of each partition and compute several data preprocessing steps (resampling, augmentation, compression, subsampling/padding, etc.).
 Filenames have to fulfill the follwing structure in order to ensure a correct data processing:  --- call/noise-XXX_ID_YEAR_TAPENAME_STARTTIME_ENDTIME ---
@@ -440,22 +475,24 @@ Single components of the filename template:
 5. STARTTIME = start time of the clip in milliseconds (integer number, e.g 123456ms = 123.456s
 5. ENDTIME = end time of the clip in milliseconds
 """
-class Dataset(AudioDataset):
 
+
+class Dataset(AudioDataset):
     """
     Create variables in order to filter the filenames whether it is a target signal (call) or a noise signal (noise). Moreover
     the entire spectral transform pipeline is created in oder to set up the data preprocessing for each audio file.
     """
+
     def __init__(
-        self,
-        split,
-        opts,
-        augmentation,
-        file_names: Iterable[str],
-        noise_directory: str,
-        loc=None,
-        *args,
-        **kwargs
+            self,
+            split,
+            opts,
+            augmentation,
+            file_names: Iterable[str],
+            noise_directory: str or None,
+            loc=None,
+            *args,
+            **kwargs
     ):
         log.info(f"{split} -- {len(file_names)} files")
         if noise_directory is not None:
@@ -543,7 +580,7 @@ class Dataset(AudioDataset):
             self.t_timestretch = T.RandomTimeStretch()
             self.t_pitchshift = T.RandomPitchSift()
         else:
-            #only for noise augmentation during validation phase - intensity, time and pitch augmentation is not used during validation/test
+            # only for noise augmentation during validation phase - intensity, time and pitch augmentation is not used during validation/test
             self.t_timestretch = T.RandomTimeStretch()
             self.t_pitchshift = T.RandomPitchSift()
             log.debug("Running without intensity, time, and pitch augmentation")
@@ -591,6 +628,7 @@ class Dataset(AudioDataset):
     Computes per filename the entire data preprocessing pipeline containing all transformations and returns the
     preprocessed sample as well as the ground truth label 
     """
+
     def __getitem__(self, idx):
         self.clone = False
         self.orig_noise = False
@@ -608,6 +646,8 @@ class Dataset(AudioDataset):
 
         sample, _ = self.t_spectrogram(file)
         sample_spec = sample.clone()
+
+
 
         # Data augmentation
         if self.augmentation:
@@ -644,7 +684,8 @@ class Dataset(AudioDataset):
         ground_truth = self.t_norm(ground_truth)
 
         # ARTF PART
-        min_dist = 0 if self.noise_files is not None and len(self.noise_files) > 0 and self.t_addnoise is not None else 1
+        min_dist = 0 if self.noise_files is not None and len(
+            self.noise_files) > 0 and self.t_addnoise is not None else 1
         distribution_idx = random.randint(min_dist, 9)
 
         if distribution_idx != 0:
@@ -655,7 +696,8 @@ class Dataset(AudioDataset):
                 gaus_stdv = round(random.uniform(0.1, 25.0), 2)
             else:
                 gaus_stdv = self.gaus_stdv
-            distribution = torch.distributions.normal.Normal(torch.tensor(self.gaus_mean), torch.tensor(gaus_stdv)).sample(
+            distribution = torch.distributions.normal.Normal(torch.tensor(self.gaus_mean),
+                                                             torch.tensor(gaus_stdv)).sample(
                 sample_shape=torch.Size([128, 256])).squeeze(dim=-1)
         elif distribution_idx == 1:
             if self.random:
@@ -760,7 +802,9 @@ class Dataset(AudioDataset):
         label = self.load_label(file)
 
         label["ground_truth"] = ground_truth
-        label["file_name"] = label["file_name"].replace(label["file_name"].rsplit("/", 1)[1], str(distribution_idx)+"_"+label["file_name"].rsplit("/", 1)[1])
+        label["file_name"] = label["file_name"].replace(label["file_name"].rsplit("/", 1)[1],
+                                                        str(distribution_idx) + "_" + label["file_name"].rsplit("/", 1)[
+                                                            1])
 
         return sample_spec_n, label
 
@@ -768,31 +812,105 @@ class Dataset(AudioDataset):
     Generate label dict containing filename and whether it is a target signal (call)
     or a noise signal (noise)
     """
+
     def load_label(self, file_name: str):
         label = dict()
         label["file_name"] = file_name
         label["call"] = True
         return label
 
+
+class HumanSpeechBatchAugmentationDataset(Dataset):
+    def __init__(self,
+                 split,
+                 opts,
+                 augmentation,
+                 file_names: Iterable[str],
+                 noise_directory: str or None,
+                 loc=None,
+                 *args,
+                 **kwargs):
+
+        super().__init__(split, opts, augmentation, file_names, noise_directory, loc, *args, **kwargs)
+
+        dataset_opts = opts.dataset
+        data_opts = opts.data
+        if loc is None or loc not in data_opts:
+            dir_opts = data_opts
+        else:
+            dir_opts = data_opts[loc]
+
+        human_speech = dir_opts.human_speech
+
+        log.info(f"Found {len(file_names)} file pairs for human speech augmentation")
+        self.clean_dir = human_speech.clean
+        self.noisy_dir = human_speech.noisy
+
+        self.clean_files = file_names
+
+        self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=False)
+
+    def _prep_file(self, file):
+        sample, _ = self.t_spectrogram(file)
+
+        # if self.augmentation:
+        #     sample = self.t_amplitude(sample)
+        #     sample = self.t_pitchshift(sample)
+        #     sample = self.t_timestretch(sample)
+        sample = self.t_subseq(sample)
+        # sample, _ = self.sp.detect_strong_spectral_region(
+        #     spectrogram=sample, spectrogram_to_extract=sample, n_fft=self.n_fft,
+        #     target_len=self.seq_len, perc_of_max_signal=self.perc_of_max_signal,
+        #     min_bin_of_interest=int(self.min_thres_detect * sample.shape[-1]),
+        #     max_bin_of_inerest=int(self.max_thres_detect * sample.shape[-1]))
+        #
+        # if isinstance(sample, list):
+        #     sample = random.choice(sample).unsqueeze(dim=0)
+
+        sample = self.t_compr_f(sample)
+        sample = self.t_compr_a(sample)
+        sample = self.t_norm(sample)
+
+        return sample
+
+
+    def __getitem__(self, sample):
+        clean_file = self.clean_files[sample]
+        noisy_file = self.noisy_files[sample]
+
+        clean_sample = self._prep_file(clean_file)
+        noisy_sample = self._prep_file(noisy_file)
+        label = {
+            "ground_truth": clean_sample
+        }
+        return noisy_sample, label
+
+
+    def __len__(self):
+        return len(self.clean_files)
+
+
 """
 Dataset for processing an audio tape via a sliding window approach using a given
 sequence length and hop size.
 """
+
+
 class StridedAudioDataset(torch.utils.data.Dataset):
     def __init__(
-        self,
-        file_name,
-        sequence_len: int,
-        hop: int,
-        sr: int = 44100,
-        fft_size: int = 4096,
-        fft_hop: int = 441,
-        n_freq_bins: int = 256,
-        freq_compression: str = "linear",
-        f_min: int = 200,
-        f_max: int = 18000,
-        center=True,
-        min_max_normalize=False
+            self,
+            file_name,
+            sequence_len: int,
+            hop: int,
+            sr: int = 44100,
+            fft_size: int = 4096,
+            fft_hop: int = 441,
+            n_freq_bins: int = 256,
+            freq_compression: str = "linear",
+            f_min: int = 200,
+            f_max: int = 18000,
+            center=True,
+            min_max_normalize=False
     ):
 
         self.hop = hop
@@ -828,7 +946,7 @@ class StridedAudioDataset(torch.utils.data.Dataset):
                 min_level_db=DefaultSpecDatasetOps["min_level_db"],
                 ref_level_db=DefaultSpecDatasetOps["ref_level_db"],
             )
-            
+
     def __len__(self):
         full_frames = max(int(ceil((self.n_frames + 1 - self.sequence_len) / self.hop)), 1)
         if (full_frames * self.sequence_len) < self.n_frames:
@@ -838,6 +956,7 @@ class StridedAudioDataset(torch.utils.data.Dataset):
     """
     Extracts signal part according to the current and respective position of the given audio file.
     """
+
     def __getitem__(self, idx):
         start = idx * self.hop
 
@@ -861,27 +980,30 @@ class StridedAudioDataset(torch.utils.data.Dataset):
     def __exit__(self, *args):
         self.loader.join()
 
+
 """
 Dataset for processing a folder of various audio files
 """
+
+
 class SingleAudioFolder(AudioDataset):
 
     def __init__(
-        self,
-        file_names: Iterable[str],
-        working_dir=None,
-        cache_dir=None,
-        sr=44100,
-        n_fft=1024,
-        hop_length=512,
-        freq_compression="linear",
-        n_freq_bins=256,
-        f_min=None,
-        f_max=18000,
-        center=True,
-        min_max_normalize=False,
-        *args,
-        **kwargs
+            self,
+            file_names: Iterable[str],
+            working_dir=None,
+            cache_dir=None,
+            sr=44100,
+            n_fft=1024,
+            hop_length=512,
+            freq_compression="linear",
+            n_freq_bins=256,
+            f_min=None,
+            f_max=18000,
+            center=True,
+            min_max_normalize=False,
+            *args,
+            **kwargs
     ):
         super().__init__(file_names, working_dir, sr, *args, **kwargs)
         if self.dataset_name is not None:
@@ -900,7 +1022,7 @@ class SingleAudioFolder(AudioDataset):
         if self.freq_compression not in valid_freq_compressions:
             raise ValueError(
                 "{} is not a valid freq_compression. Must be one of {}",
-               format(self.freq_compression, valid_freq_compressions),
+                format(self.freq_compression, valid_freq_compressions),
             )
 
         log.debug(

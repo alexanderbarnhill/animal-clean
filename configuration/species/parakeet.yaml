@@ -9,6 +9,10 @@ data:
       train:
       val:
       test:
+    human_speech:
+      clean: ""
+      noisy: ""
+      batch_percentage: 0.5
     working_directory:
     cache_directory:
 
@@ -18,6 +22,10 @@ data:
       train: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/parakeet/noise/train"
       val: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/parakeet/noise/val"
       test: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/parakeet/noise/test"
+    human_speech:
+      clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
+      noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
+      batch_percentage: 0.5
     working_directory:
     cache_directory:
 

@@ -1,16 +1,14 @@
 from typing import Any
 
 import lightning.pytorch as pl
+import torch
 from torch.optim import Adam, SGD, AdamW
 
 from models.L2Loss import L2Loss
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import logging as log
 from models.unet_model import UNet
-import matplotlib.pyplot as plt
-import io
-from PIL import Image
-
+import random
 from utilities.viewing import convert_tensor_to_PIL
 
 
@@ -24,6 +22,8 @@ class AnimalClean(pl.LightningModule):
         self.save_hyperparameters()
         self.samples = None
         self.epoch = 0
+        self.use_human_speech_augmentation = False
+        self.human_speech_loader = None
         log.info(self.model)
 
     def get_optimizer(self, opts, parameters):
@@ -65,6 +65,27 @@ class AnimalClean(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         ground_truth = y["ground_truth"]
+        if self.use_human_speech_augmentation and self.human_speech_loader is not None:
+            h_x, h_y = next(iter(self.human_speech_loader))
+            h_x = h_x.to(self.device)
+            h_gt = h_y["ground_truth"]
+            h_gt = h_gt.to(self.device)
+            x_c = torch.concat([x, h_x], dim=0)
+            gt_c = torch.concat([ground_truth, h_gt], dim=0)
+
+            x = x_c.clone()
+            ground_truth = gt_c.clone()
+
+            idxs = list(range(0, x.shape[0]))
+            random.shuffle(idxs)
+
+            for i, idx in enumerate(idxs):
+                x[i] = x_c[idx]
+                ground_truth[i] = gt_c[idx]
+
+            x = x.to(self.device)
+            ground_truth = ground_truth.to(self.device)
+
         output = self.model(x)
         loss = self.criterion(output, ground_truth)
 

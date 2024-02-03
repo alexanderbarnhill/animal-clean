@@ -65,7 +65,7 @@ dataset:
       max_snr: -8
 
     noise_masking:
-      masking_probability: 0.5
+      masking_probability: 0.0
       df: 15.0
       exp_e: 0.1
       bin_pow: 2.0

@@ -34,15 +34,19 @@ def test_configuration_merge_duplicates():
 
 
 def test_configuration_default():
-    configuration = get_configuration(configuration_base=os.path.join(CONFIGURATION_BASE, DEFAULTS))
+    configuration = get_configuration(
+        configuration_base=os.path.join(CONFIGURATION_BASE, DEFAULTS))
     assert configuration is not None, "Configuration cannot be None"
 
 
 def test_configuration_monitoring():
-    configuration = get_configuration(configuration_base=os.path.join(CONFIGURATION_BASE, MONITORING))
+    configuration = get_configuration(
+        configuration_base=os.path.join(CONFIGURATION_BASE, MONITORING))
     assert configuration is not None, "Configuration cannot be None"
 
 
 def test_configuration_species():
-    configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=os.path.join(CONFIGURATION_BASE, f"species{os.sep}ape.yaml"))
+    configuration = build_configuration(
+        defaults_path=CONFIGURATION_BASE,
+        species_configuration=os.path.join(CONFIGURATION_BASE, f"species{os.sep}ape.yaml"))
     assert configuration.dataset.fft.n_fft == 2048

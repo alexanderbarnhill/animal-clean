@@ -530,6 +530,7 @@ class Dataset(AudioDataset):
         self.gaus_stdv = aug_opts.noise_masking.gauss_std
         self.poisson_lambda = aug_opts.noise_masking.poisson_lambda
         self.orig_noise_value = aug_opts.noise_masking.original_noise_value
+        self.masking_probability = aug_opts.noise_masking.masking_probability
 
         self.freq_compression = dataset_opts.frequency.compression
         self.f_min = dataset_opts.frequency.frequency_min
@@ -683,10 +684,26 @@ class Dataset(AudioDataset):
         ground_truth = self.t_compr_a(ground_truth)
         ground_truth = self.t_norm(ground_truth)
 
+
+
         # ARTF PART
         min_dist = 0 if self.noise_files is not None and len(
             self.noise_files) > 0 and self.t_addnoise is not None else 1
-        distribution_idx = random.randint(min_dist, 9)
+
+        noise_method = random.random()
+        if noise_method < self.masking_probability:
+            # Do Masking Only
+            min_dist = 1
+            max_dist = 9
+        else:
+            if min_dist == 1:
+                # Additive noise not possible. Do masking
+                max_dist = 9
+            else:
+                # Additive noise is possible, Min dist is 0, Max dist is 0
+                max_dist = 0
+
+        distribution_idx = random.randint(min_dist, max_dist)
 
         if distribution_idx != 0:
             sample_spec = self.t_compr_a(sample_spec)

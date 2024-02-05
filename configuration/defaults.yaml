@@ -1,3 +1,4 @@
+name: default
 data:
   local:
     data_directory: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"

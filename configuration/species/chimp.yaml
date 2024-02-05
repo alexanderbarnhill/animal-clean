@@ -13,7 +13,7 @@ data:
     human_speech:
       clean: "/home/alex/data/animal-clean/training/data/human_speech/clean_trainset_28spk_wav"
       noisy: "/home/alex/data/animal-clean/training/data/human_speech/noisy_trainset_28spk_wav"
-      batch_percentage: 0.5
+      batch_percentage: 0.0
     working_directory:
     cache_directory:
 

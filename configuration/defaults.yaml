@@ -43,7 +43,7 @@ optimization:
   learning_rate: 1e-4
 
   adam:
-    beta_1: 0.9
+    beta_1: 0.5
     beta_2: 0.99
 
   sgd:

@@ -3,4 +3,4 @@ monitoring:
 
 monitoring_methods:
   wandb:
-    project: animal-clean
+    project: animal-clean-D

@@ -35,7 +35,7 @@ class AnimalClean(pl.LightningModule):
         log.info(f"Trying to initialize {optimizer} optimizer")
 
         if optimizer.lower() == "adam":
-            return Adam(parameters, lr=learning_rate,
+            return Adam(parameters, lr=learning_rate * training_opts.batch_size,
                         betas=(optimization_opts.adam.beta_1, optimization_opts.adam.beta_2))
         elif optimizer.lower() == "sgd":
             return SGD(parameters, lr=learning_rate, momentum=optimization_opts.sgd.momentum)

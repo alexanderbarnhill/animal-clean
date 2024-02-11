@@ -58,7 +58,8 @@ if __name__ == '__main__':
     logger = None
     if configuration.monitoring.method.lower() == "wandb":
         # wandb.login(key=configuration.secrets.monitoring.wandb.api_key)
-        logger = pl_loggers.WandbLogger(project=configuration.monitoring_methods.wandb.project + f"-{configuration.name}", log_model="all",
+        logger = pl_loggers.WandbLogger(project=configuration.monitoring_methods.wandb.project + f"-{configuration.name}",
+                                        log_model="all",
                                         save_dir=training_directory)
 
         logger.watch(model, log="all")

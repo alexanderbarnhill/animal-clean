@@ -531,6 +531,12 @@ class Dataset(AudioDataset):
         self.poisson_lambda = aug_opts.noise_masking.poisson_lambda
         self.orig_noise_value = aug_opts.noise_masking.original_noise_value
         self.masking_probability = aug_opts.noise_masking.masking_probability
+        if self.masking_probability == 0.0:
+            log.info(f"Creation of Binary Masks disabled")
+        elif self.masking_probability == 1.0:
+            log.info(f"Additive noise masking disabled -- only using binary masks")
+        else:
+            log.info(f"Binary masks will be created with probability {self.masking_probability}")
 
         self.freq_compression = dataset_opts.frequency.compression
         self.f_min = dataset_opts.frequency.frequency_min
@@ -624,6 +630,7 @@ class Dataset(AudioDataset):
             log.debug("Init 0/1-dB-normalization activated")
 
         self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=augmentation)
+
 
     """
     Computes per filename the entire data preprocessing pipeline containing all transformations and returns the

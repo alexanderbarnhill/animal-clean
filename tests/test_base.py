@@ -11,6 +11,7 @@ DEFAULTS = "defaults.yaml"
 MONITORING = "monitoring.yaml"
 
 ORCA = os.path.join(SPECIES_BASE, "orca.yaml")
+CHIMP = os.path.join(SPECIES_BASE, "chimp.yaml")
 
 
 class _DummyModel(nn.Module):

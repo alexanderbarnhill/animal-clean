@@ -5,15 +5,15 @@ name: chimpanzee
 
 data:
   local:
-    data_directory: "/home/alex/data/animal-clean/training/data/denoising_training/chimp/signal"
+    data_directory: "/media/alex/Datasets/04_animal-clean/training/data/denoising/chimp/signal"
     noise_sources:
-      train: /home/alex/data/animal-clean/training/data/denoising_training/chimp/NOISE/train
-      val: /home/alex/data/animal-clean/training/data/denoising_training/chimp/NOISE/val
-      test: /home/alex/data/animal-clean/training/data/denoising_training/chimp/NOISE/test
+      train: /media/alex/Datasets/04_animal-clean/training/data/denoising/chimp/NOISE/train
+      val: /media/alex/Datasets/04_animal-clean/training/data/denoising/chimp/NOISE/val
+      test: /media/alex/Datasets/04_animal-clean/training/data/denoising/chimp/NOISE/test
     human_speech:
-      clean: "/home/alex/data/animal-clean/training/data/human_speech/clean_trainset_28spk_wav"
-      noisy: "/home/alex/data/animal-clean/training/data/human_speech/noisy_trainset_28spk_wav"
-      batch_percentage: 0.0
+      clean: "/media/alex/Datasets/04_animal-clean/training/data/human_speech/clean_trainset_28spk_wav"
+      noisy: "/media/alex/Datasets/04_animal-clean/training/data/human_speech/noisy_trainset_28spk_wav"
+      batch_percentage: 0.5
     working_directory:
     cache_directory:
 
@@ -67,7 +67,7 @@ dataset:
       max_snr: 12
 
     noise_masking:
-      masking_probability: 0.5
+      masking_probability: 0.0
       df: 15.0
       exp_e: 0.1
       bin_pow: 2.0

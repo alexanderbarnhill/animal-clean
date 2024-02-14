@@ -866,9 +866,10 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
         self.clean_files = file_names
         self.n_fft = dataset_opts.fft.n_fft
         self.hop = dataset_opts.fft.hop
+        self.sr = dataset_opts.sample_rate
 
         spec_transforms = [
-            lambda fn: T.load_audio_file(fn, sr=48000),
+            lambda fn: T.load_audio_file(fn, sr=self.sr),
             T.PreEmphasize(dataset_opts.pre_emphasis),
             T.Spectrogram(self.n_fft, self.hop, center=False),
         ]
@@ -877,7 +878,7 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
         self.t_spectrogram = T.Compose(spec_transforms)
 
         self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=False)
-        self.t_compr_f = T.Interpolate(self.n_freq_bins, 48000, 50, 10000)
+        self.t_compr_f = T.Interpolate(self.n_freq_bins, self.sr, 50, 10000)
 
     def _prep_file(self, file):
         sample, _ = self.t_spectrogram(file)

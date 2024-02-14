@@ -6,6 +6,9 @@ from tests.test_base import *
 import matplotlib.pyplot as plt
 import torch
 import random
+from utilities.viewing import convert_tensor_to_PIL
+
+
 def _show(sample, transpose=True, file_name=None):
     s = sample.clone()
     s = s.detach().cpu().numpy()
@@ -63,7 +66,7 @@ def test_get_human_speech_dataset():
     assert sample is not None
 
 def test_combine_dataloaders():
-    configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=ORCA)
+    configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=CHIMP)
     configuration.training.batch_size = 8
     h_loader = get_human_speech_loader(configuration)
     loaders = get_data_loaders(configuration)
@@ -90,7 +93,9 @@ def test_combine_dataloaders():
         x[i] = x_c[idx]
         ground_truth[i] = gt_c[idx]
 
-
+    for i in idxs:
+        img = convert_tensor_to_PIL(image_tensor=ground_truth[i])
+        img.show()
 
 
     assert x.shape[0] == configuration.training.batch_size

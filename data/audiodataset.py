@@ -864,11 +864,13 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
         self.noisy_dir = human_speech.noisy
 
         self.clean_files = file_names
+        self.n_fft = dataset_opts.fft.n_fft
+        self.hop = dataset_opts.fft.hop
 
         spec_transforms = [
             lambda fn: T.load_audio_file(fn, sr=48000),
             T.PreEmphasize(dataset_opts.pre_emphasis),
-            T.Spectrogram(4096, 440, center=False),
+            T.Spectrogram(self.n_fft, self.hop, center=False),
         ]
 
 

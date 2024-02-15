@@ -5,11 +5,11 @@ name: compare-primate
 
 data:
   local:
-    data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
+    data_directory: "/media/alex/Datasets/04_animal-clean/training/data/denoising/primate/signal"
     noise_sources:
-      train:
-      val:
-      test:
+      train: /media/alex/Datasets/04_animal-clean/training/data/denoising/primate/noise/train
+      val: /media/alex/Datasets/04_animal-clean/training/data/denoising/primate/noise/val
+      test: /media/alex/Datasets/04_animal-clean/training/data/denoising/primate/noise/test
     human_speech:
       clean: ""
       noisy: ""
@@ -53,13 +53,13 @@ dataset:
 
     time_stretch:            # Stretch a signal by a factor randomly selected in a given range (e.g. 0.5 will halve the signal)
       active: true
-      from: 0.5
-      to: 2
+      from_: 0.5
+      to_: 2
 
     pitch_shift:             # Shift the pitch by a factor randomly selected from within a given range
       active: true
-      from: 0.5
-      to: 1.5
+      from_: 0.5
+      to_: 1.5
 
     noise_addition: # Add noise from given noise files with an SNR randomly selected from a given range
       active: true

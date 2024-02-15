@@ -107,7 +107,7 @@ def use_human_speech_augmentation(opts, loc="local"):
     return False
 
 
-def get_data_loaders(opts, loc="local"):
+def get_data_loaders(opts, loc="local", m=None):
     log.info(f"Location Information: {loc}")
     if "data_directory" in opts.data:
         data_dir = opts.data.data_directory
@@ -134,7 +134,8 @@ def get_data_loaders(opts, loc="local"):
             file_names=input_data.load(split, audio_files),
             augmentation=augmentation if split == "train" else False,
             noise_directory=opts.data[loc].noise_sources[split],
-            loc=loc
+            loc=loc,
+            m=m
 
         )
         for split in split_fracs.keys()

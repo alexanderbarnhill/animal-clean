@@ -12,6 +12,9 @@ MONITORING = "monitoring.yaml"
 
 ORCA = os.path.join(SPECIES_BASE, "orca.yaml")
 CHIMP = os.path.join(SPECIES_BASE, "chimp.yaml")
+BAT = os.path.join(SPECIES_BASE, "bat.yaml")
+PARAKEET = os.path.join(SPECIES_BASE, "parakeet.yaml")
+WARBLER = os.path.join(SPECIES_BASE, "warbler.yaml")
 
 
 class _DummyModel(nn.Module):

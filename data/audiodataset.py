@@ -491,9 +491,11 @@ class Dataset(AudioDataset):
             file_names: Iterable[str],
             noise_directory: str or None,
             loc=None,
+            m=None,
             *args,
             **kwargs
     ):
+        self.m = m
         log.info(f"{split} -- {len(file_names)} files")
         if noise_directory is not None:
             log.info(f"Looking for noise files in {noise_directory}")
@@ -523,6 +525,7 @@ class Dataset(AudioDataset):
         self.sp = signal.signal_proc()
 
         aug_opts = dataset_opts.augmentation
+        self.sample_rate = dataset_opts.sample_rate
         self.df = aug_opts.noise_masking.df
         self.exp_e = aug_opts.noise_masking.exp_e
         self.bin_pow = aug_opts.noise_masking.bin_pow
@@ -582,14 +585,29 @@ class Dataset(AudioDataset):
                 file_reader=self.file_reader)
 
         if self.augmentation:
+
             log.debug("Init augmentation transforms for intensity, time, and pitch shift")
-            self.t_amplitude = T.RandomAmplitude(3, -6)
-            self.t_timestretch = T.RandomTimeStretch()
-            self.t_pitchshift = T.RandomPitchSift()
+            self.t_amplitude = T.RandomAmplitude(
+                increase_db=aug_opts.amplitude_shift.increase_db,
+                decrease_db=aug_opts.amplitude_shift.decrease_db)
+            self.t_timestretch = T.RandomTimeStretch(
+                from_=aug_opts.time_stretch.from_,
+                to_=aug_opts.time_stretch.to_
+            )
+            self.t_pitchshift = T.RandomPitchSift(
+                from_=aug_opts.pitch_shift.from_,
+                to_=aug_opts.pitch_shift.to_
+            )
         else:
             # only for noise augmentation during validation phase - intensity, time and pitch augmentation is not used during validation/test
-            self.t_timestretch = T.RandomTimeStretch()
-            self.t_pitchshift = T.RandomPitchSift()
+            self.t_timestretch = T.RandomTimeStretch(
+                from_=aug_opts.time_stretch.from_,
+                to_=aug_opts.time_stretch.to_
+            )
+            self.t_pitchshift = T.RandomPitchSift(
+                from_=aug_opts.pitch_shift.from_,
+                to_=aug_opts.pitch_shift.to_
+            )
             log.debug("Running without intensity, time, and pitch augmentation")
 
         if self.freq_compression == "linear":
@@ -609,8 +627,8 @@ class Dataset(AudioDataset):
                 self.t_spectrogram,
                 T.Compose(self.t_timestretch, self.t_pitchshift, self.t_compr_f),
                 min_length=self.seq_len,
-                min_snr=-2,
-                max_snr=-8,
+                min_snr=aug_opts.noise_addition.min_snr,
+                max_snr=aug_opts.noise_addition.max_snr,
                 return_original=True
             )
         else:
@@ -711,7 +729,8 @@ class Dataset(AudioDataset):
                 max_dist = 0
 
         distribution_idx = random.randint(min_dist, max_dist)
-
+        if self.m is not None:
+            distribution_idx = self.m
         if distribution_idx != 0:
             sample_spec = self.t_compr_a(sample_spec)
 
@@ -784,7 +803,13 @@ class Dataset(AudioDataset):
         elif self.binary_orig:
             # amplitude and normalized
             sample_spec_n = binary_input.clone()
-            binary_mask = self.sp.create_mask(trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
+            binary_mask = self.sp.create_mask(
+                sr=self.sample_rate,
+                fmax=self.f_max,
+                fmin=self.f_min,
+                nfft=self.n_fft,
+                trainable_spectrogram=sample_spec_n
+            ).unsqueeze(dim=0)
             ground_truth = binary_input * binary_mask
             ground_truth = self.t_compr_f(ground_truth)
             sample_spec_n = self.t_compr_f(binary_input_not_cmpr_not_norm)
@@ -792,7 +817,12 @@ class Dataset(AudioDataset):
             sample_spec_n = self.t_norm(sample_spec_n)
         elif self.binary_ones_pow:
             sample_spec_n = binary_input.clone()
-            binary_mask = self.sp.create_mask(trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
+            binary_mask = self.sp.create_mask(
+                sr=self.sample_rate,
+                fmax=self.f_max,
+                fmin=self.f_min,
+                nfft=self.n_fft,
+                trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
             ground_truth = binary_input + binary_mask
             ground_truth[ground_truth >= 1.0] = 1.0
             ground_truth = ground_truth.pow(bin_pow)
@@ -802,7 +832,12 @@ class Dataset(AudioDataset):
             sample_spec_n = self.t_norm(sample_spec_n)
         elif self.binary_orig_pow:
             sample_spec_n = binary_input.clone()
-            binary_mask = self.sp.create_mask(trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
+            binary_mask = self.sp.create_mask(
+                sr=self.sample_rate,
+                fmax=self.f_max,
+                fmin=self.f_min,
+                nfft=self.n_fft,
+                trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
             ground_truth = binary_input + binary_mask
             ground_truth[ground_truth >= 1.0] = 0.0
             ground_truth = ground_truth.pow(bin_pow)
@@ -813,7 +848,12 @@ class Dataset(AudioDataset):
             sample_spec_n = self.t_norm(sample_spec_n)
         elif self.binary_mask:
             sample_spec_n = binary_input.clone()
-            binary_mask = self.sp.create_mask(trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
+            binary_mask = self.sp.create_mask(
+                sr=self.sample_rate,
+                fmax=self.f_max,
+                fmin=self.f_min,
+                nfft=self.n_fft,
+                trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
             ground_truth = binary_mask
             ground_truth = self.t_compr_f(ground_truth)
             sample_spec_n = self.t_compr_f(binary_input_not_cmpr_not_norm)
@@ -842,6 +882,10 @@ class Dataset(AudioDataset):
         label["file_name"] = file_name
         label["call"] = True
         return label
+
+    def get_sample_with_augmentation(self, sample_idx, augmentation):
+        self.m = augmentation
+        return self.__getitem__(sample_idx)
 
 
 class HumanSpeechBatchAugmentationDataset(Dataset):

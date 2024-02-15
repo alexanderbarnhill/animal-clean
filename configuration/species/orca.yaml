@@ -5,11 +5,11 @@ name: killer-whale
 
 data:
   local:
-    data_directory: "/home/alex/data/animal-clean/training/data/denoising_training/orca/signal/AOEC"
+    data_directory: "/media/alex/Datasets/04_animal-clean/training/data/denoising/orca/signal"
     noise_sources:
-      train: /home/alex/data/animal-clean/training/data/denoising_training/orca/noise/train
-      val: /home/alex/data/animal-clean/training/data/denoising_training/orca/noise/val
-      test: /home/alex/data/animal-clean/training/data/denoising_training/orca/noise/test
+      train: /media/alex/Datasets/04_animal-clean/training/data/denoising/orca/noise/train
+      val: /media/alex/Datasets/04_animal-clean/training/data/denoising/orca/noise/val
+      test: /media/alex/Datasets/04_animal-clean/training/data/denoising/orca/noise/test
     human_speech:
       clean: "/home/alex/data/animal-clean/training/data/human_speech/clean_trainset_28spk_wav"
       noisy: "/home/alex/data/animal-clean/training/data/human_speech/noisy_trainset_28spk_wav"
@@ -54,13 +54,13 @@ dataset:
 
     time_stretch:            # Stretch a signal by a factor randomly selected in a given range (e.g. 0.5 will halve the signal)
       active: true
-      from: 0.5
-      to: 2
+      from_: 0.5
+      to_: 2
 
     pitch_shift:             # Shift the pitch by a factor randomly selected from within a given range
       active: true
-      from: 0.5
-      to: 1.5
+      from_: 0.5
+      to_: 1.5
 
     noise_addition:          # Add noise from given noise files with an SNR randomly selected from a given range
       active: true

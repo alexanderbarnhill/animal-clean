@@ -33,9 +33,8 @@ export https_proxy="http://proxy.rrze.uni-erlangen.de:80"
 cluster=/cluster/barnhill
 env_dir=$cluster/env
 mkdir -p $env_dir
-pytorch_version=1.7.1
-torchvision_version=0.8.2
-pytorch_env=$(hostname)_pytorch-$pytorch_version
+
+pytorch_env=$(hostname)_pytorch
 
 virtualenv --system-site-packages -p python3 $env_dir/$pytorch_env
 source $env_dir/$pytorch_env/bin/activate
@@ -43,7 +42,7 @@ source $env_dir/$pytorch_env/bin/activate
 cd $source_dir || exit
 
 echo "Installing requirements"
-pip3 install lightning wandb omegaconf torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 torchmetrics==1.3.0
+pip3 install lightning wandb omegaconf numba==0.59.0 numpy==1.26.4 torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 torchmetrics==1.3.1
 
 
 wandb_key=bf8463a6e7024aac12d6fb224bb1fe5d155cc679

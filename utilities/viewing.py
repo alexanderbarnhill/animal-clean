@@ -27,5 +27,5 @@ def convert_tensor_to_PIL( image_tensor, transpose=True):
 def resize_image(image, base_width=512):
     wpercent = (base_width / float(image.size[0]))
     hsize = int((float(image.size[1]) * float(wpercent)))
-    image = image.resize((base_width, hsize), Image.Resampling.LANCZOS)
+    image = image.resize((base_width, hsize), Image.LANCZOS)
     return image

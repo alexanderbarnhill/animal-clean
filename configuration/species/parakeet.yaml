@@ -11,9 +11,9 @@ data:
       val: /media/alex/Datasets/04_animal-clean/training/data/denoising/parakeet/noise/val
       test: /media/alex/Datasets/04_animal-clean/training/data/denoising/parakeet/noise/test
     human_speech:
-      clean: ""
-      noisy: ""
-      batch_percentage: 0.0
+      clean: /media/alex/Datasets/04_animal-clean/training/data/human_speech/clean_trainset_28spk_wav
+      noisy: /media/alex/Datasets/04_animal-clean/training/data/human_speech/noisy_trainset_28spk_wav
+      batch_percentage: 0.5
     working_directory:
     cache_directory:
 

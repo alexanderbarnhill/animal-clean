@@ -2,7 +2,7 @@ absl-py==2.0.0
 aiohttp==3.9.1
 aiosignal==1.3.1
 antlr4-python3-runtime==4.13.1
-anyio==4.2.0
+anyio
 arrow==1.3.0
 async-timeout==4.0.3
 attrs==23.1.0

@@ -25,23 +25,25 @@ configuration_directory=$source_dir/configuration
 species_configuration_directory=$configuration_directory/species
 species_configuration_file=$species_configuration_directory/$config_file
 
-venv_directory=/cluster/barnhill/code/animal-vae/venv
+
 export CUDA_VISIBLE_DEVICES=0,1
 export https_proxy="http://proxy.rrze.uni-erlangen.de:80"
 
 
-if [ ! -d "$venv_directory" ]
-then
-  echo "Virtual environment does not exist. Setting it up."
-  python3 -m venv $venv_directory
+cluster=/cluster/barnhill
+env_dir=$cluster/env
+mkdir -p $env_dir
+pytorch_version=1.7.1
+torchvision_version=0.8.2
+pytorch_env=$(hostname)_pytorch-$pytorch_version
 
-fi
+virtualenv --system-site-packages -p python3 $env_dir/$pytorch_env
+source $env_dir/$pytorch_env/bin/activate
 
-source $venv_directory/bin/activate
 cd $source_dir || exit
 
 echo "Installing requirements"
-pip3 install -r requirements.txt
+pip3 install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 torchmetrics>=1.3.0 lightning Pillow resampy wandb
 
 
 wandb_key=bf8463a6e7024aac12d6fb224bb1fe5d155cc679

@@ -43,7 +43,7 @@ source $env_dir/$pytorch_env/bin/activate
 cd $source_dir || exit
 
 echo "Installing requirements"
-pip3 install lightning wandb torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 torchmetrics==1.3.0
+pip3 install lightning wandb omegaconf torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 torchmetrics==1.3.0
 
 
 wandb_key=bf8463a6e7024aac12d6fb224bb1fe5d155cc679

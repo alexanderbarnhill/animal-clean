@@ -718,7 +718,7 @@ class Dataset(AudioDataset):
         noise_method = random.random()
         if noise_method < self.masking_probability:
             # Do Masking Only
-            min_dist = 1
+            min_dist = 6
             max_dist = 9
         else:
             if min_dist == 1:

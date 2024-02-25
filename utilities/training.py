@@ -25,8 +25,7 @@ def get_callbacks(opts):
         EarlyStopping(monitor=opts.training.early_stopping.monitor,
                       mode=opts.training.early_stopping.mode,
                       patience=opts.training.early_stopping.patience
-                      ),
-        ModelSummary(max_depth=-1)
+                      )
     ]
 
     if opts.training.enable_checkpointing:

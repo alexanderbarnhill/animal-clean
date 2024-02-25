@@ -74,7 +74,9 @@ if __name__ == '__main__':
         callbacks=get_callbacks(configuration),
         enable_checkpointing=configuration.training.enable_checkpointing,
         strategy="ddp",
-        limit_train_batches=1.0 if not configuration.training.debugging.active else configuration.training.debugging.limit_train_batch
+        limit_train_batches=1.0 if not configuration.training.debugging.active else configuration.training.debugging.limit_train_batch,
+        enable_model_summary=True
+
     )
 
     in_slurm = "SLURM_JOB_ID" in os.environ
@@ -90,7 +92,23 @@ if __name__ == '__main__':
 
     log.info(f"Acquired data loaders")
 
-    trainer.fit(model, train_dataloaders=dataloaders["train"], val_dataloaders=dataloaders["val"])
+    ckpt_path = None
+
+    if configuration.training.ckpt_path is not None and os.path.isfile(configuration.training.ckpt_path):
+        log.info(f"Loading from checkpoint : {configuration.training.ckpt_path}")
+        ckpt_path = configuration.training.ckpt_path
+    elif configuration.training.ckpt_path is not None and configuration.training.ckpt_path == "last":
+        ckpt_path = "last"
+        log.info(f"Attempting to resume training from last checkpoint")
+    else:
+        log.info(f"Starting training from scratch")
+
+    trainer.fit(
+        model,
+        train_dataloaders=dataloaders["train"],
+        val_dataloaders=dataloaders["val"],
+        ckpt_path=ckpt_path
+    )
 
     log.info(f"Training finished. Moving on to test phase")
     trainer.test(model=model, dataloaders=dataloaders["test"])

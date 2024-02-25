@@ -3,7 +3,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-def convert_tensor_to_PIL( image_tensor, transpose=True):
+def convert_tensor_to_PIL(image_tensor, transpose=True):
     if image_tensor.shape[0] == 1:
         image_tensor = image_tensor[0]
     if transpose:

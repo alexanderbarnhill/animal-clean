@@ -31,6 +31,11 @@ data:
     working_directory:
     cache_directory:
 
+
+training:
+  training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/orca"
+  ckp_path: /cluster/barnhill/code/animal-clean/training_output/animal-clean-D-killer-whale/9nisquk9/checkpoints/epoch=6-step=9541.ckpt
+
 dataset:
 
   sample_rate: 44100

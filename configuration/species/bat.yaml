@@ -31,6 +31,11 @@ data:
     working_directory:
     cache_directory:
 
+
+training:
+  training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/bat"
+  ckp_path:
+
 dataset:
   sample_rate: 256000
   pre_emphasis: 0.98

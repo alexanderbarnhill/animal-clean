@@ -3,14 +3,14 @@ batch_size: 1
 num_workers: 0
 visualization:
   active: true
-  separate_img: true
-  split_in_out: true
+  separate_img: false
+  split_in_out: false
   img_out:
 
 visualize: true
-input: "/home/alex/data/animal-clean/training/data/warbler/signal"
-output: "/home/alex/data/animal-clean/training/data/warbler/signal-denoised"
+input: "/media/alex/Datasets/04_animal-clean/evaluation/bat/input_data"
+output: "/media/alex/Datasets/04_animal-clean/evaluation/bat/output"
 maintain_directory_structure: true
 file_ext:
-model_path: "/home/alex/data/model_storage/ANIMAL-CLEAN/warbler/v1/model.ckpt"
+model_path: "/media/alex/Datasets/model_storage/ANIMAL-CLEAN/bat/bat-H50-3_v22.ckpt"
 sequence_length: 1.28

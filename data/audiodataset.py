@@ -1153,6 +1153,7 @@ class SingleAudioFolder(AudioDataset):
                 ref_level_db=DefaultSpecDatasetOps["ref_level_db"],
             )
             log.debug("Init 0/1-dB-normalization activated")
+        self.t_subseq = T.PaddedSubsequenceSampler(128, dim=1, random=False)
 
     def __getitem__(self, idx):
         file_name = self.file_names[idx]
@@ -1168,5 +1169,10 @@ class SingleAudioFolder(AudioDataset):
         sample_spec = self.t_compr_f(sample_spec_orig)
 
         sample_spec = self.t_norm(sample_spec)
+
+        sample_spec = self.t_subseq(sample_spec)
+        sample_spec_cmplx = self.t_subseq(sample_spec_cmplx)
+
+
 
         return sample_spec_orig, sample_spec, sample_spec_cmplx, file_name

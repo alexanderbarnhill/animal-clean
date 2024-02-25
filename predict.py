@@ -17,6 +17,9 @@ from data import signal
 from data.audiodataset import SingleAudioFolder, StridedAudioDataset
 from models.model import AnimalClean
 from utilities.configuration import get_configuration
+import shutil
+
+from utilities.viewing import convert_tensor_to_PIL
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config",
@@ -46,6 +49,7 @@ def get_data_loader(conf, **kwargs):
             freq_compression=kwargs["freq_compression"],
             f_min=kwargs["fmin"],
             f_max=kwargs["fmax"],
+            min_max_normalize=False
         )
         concat = False
     elif os.path.isfile(conf.input):
@@ -161,6 +165,8 @@ if __name__ == '__main__':
     os.makedirs(output, exist_ok=True)
 
     log.info(f"Writing output to {output}")
+    log.info(f"Copying configuration to {output}")
+    shutil.copy(args.config, output)
     if configuration.maintain_directory_structure:
         log.info(f"Attempting to maintain source directory structure")
     io, oo = output, output
@@ -198,6 +204,7 @@ if __name__ == '__main__':
     n_fft = species_options.dataset.fft.n_fft
     hop_length = species_options.dataset.fft.hop
     n_freq_bins = species_options.dataset.feature_size.n_freq_bins
+    min_max_normalize = species_options.dataset.normalization.method == "min_max"
 
     sequence_len = int(ceil(configuration.sequence_length * sr))
 
@@ -214,6 +221,7 @@ if __name__ == '__main__':
                                                n_freq_bins=n_freq_bins,
                                                sequence_len=sequence_len,
                                                hop=hop,
+                                               min_max_normalize=min_max_normalize,
                                                freq_compression=compression)
     log.info(f"Data Loader Size: {len(data_loader)}")
 
@@ -223,7 +231,10 @@ if __name__ == '__main__':
             sample_spec_orig, batch, spec_cmplx, filename = b
             log.info(f"[{i}] :: {filename[0]}")
             batch = batch.to(device)
-            denoised_output = model(batch)
+            try:
+                denoised_output = model(batch)
+            except RuntimeError:
+                continue
             decompressed_net_out = t_decompr_f(denoised_output)
             spec_cmplx = spec_cmplx.squeeze(dim=0).to(device)
             decompressed_net_out = decompressed_net_out.unsqueeze(dim=-1)
@@ -234,27 +245,31 @@ if __name__ == '__main__':
             detected_spec_cmplx = spec_cmplx.squeeze(dim=0).transpose(0, 1)
 
             if sp is not None:
-                input_name = os.path.join(io, f"net_in_spec_{filename[0].split('/')[-1].split('.')[0]}.pdf")
-                output_name = os.path.join(oo, f"net_out_spec_{filename[0].split('/')[-1].split('.')[0]}.pdf")
-                sp.plot_spectrogram(spectrogram=batch.squeeze(dim=0),
-                                    title="",
-                                    output_filepath=input_name,
-                                    sr=sr,
-                                    hop_length=hop_length,
-                                    fmin=fmin,
-                                    fmax=fmax,
-                                    show=False,
-                                    ax_title="spectrogram")
-
-                sp.plot_spectrogram(spectrogram=denoised_output.squeeze(dim=0),
-                                    title="",
-                                    output_filepath=output_name,
-                                    sr=sr,
-                                    hop_length=hop_length,
-                                    fmin=fmin,
-                                    fmax=fmax,
-                                    show=False,
-                                    ax_title="spectrogram")
+                input_name = os.path.join(io, f"net_in_spec_{filename[0].split('/')[-1].split('.')[0]}.png")
+                output_name = os.path.join(oo, f"net_out_spec_{filename[0].split('/')[-1].split('.')[0]}.png")
+                input_img = convert_tensor_to_PIL(batch.squeeze(), transpose=True)
+                output_img = convert_tensor_to_PIL(denoised_output.squeeze(), transpose=True)
+                input_img.save(input_name)
+                output_img.save(output_name)
+                # sp.plot_spectrogram(spectrogram=batch.squeeze(dim=0),
+                #                     title="",
+                #                     output_filepath=input_name,
+                #                     sr=sr,
+                #                     hop_length=hop_length,
+                #                     fmin=fmin,
+                #                     fmax=fmax,
+                #                     show=False,
+                #                     ax_title="spectrogram")
+                #
+                # sp.plot_spectrogram(spectrogram=denoised_output.squeeze(dim=0),
+                #                     title="",
+                #                     output_filepath=output_name,
+                #                     sr=sr,
+                #                     hop_length=hop_length,
+                #                     fmin=fmin,
+                #                     fmax=fmax,
+                #                     show=False,
+                #                     ax_title="spectrogram")
 
             if concatenate:
                 audio_out_denoised = torch.istft(audio_spec,

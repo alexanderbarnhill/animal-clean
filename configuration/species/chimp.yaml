@@ -30,6 +30,9 @@ data:
     working_directory:
     cache_directory:
 
+training:
+  training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/chimp"
+  ckp_path:
 
 dataset:
   sample_rate: 44100

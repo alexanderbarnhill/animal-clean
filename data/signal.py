@@ -395,7 +395,6 @@ class signal_proc(object):
         spectrogram = spectrogram.T
         figsize: Tuple[int, int] = (5, 10)
         figure = plt.figure(figsize=figsize)
-        figure.suptitle(title)
         if log:
             f = np.logspace(np.log2(fmin), np.log2(fmax), num=spectrogram.shape[0], base=2)
         else:
@@ -403,10 +402,10 @@ class signal_proc(object):
         t = np.arange(0, spectrogram.shape[1]) * hop_length / sr
         if axes is None:
             axes = plt.gca()
-        if ax_title is not None:
-            axes.set_title(ax_title)
+        # if ax_title is not None:
+        #     axes.set_title(ax_title)
         img = axes.pcolormesh(t, f, spectrogram, shading="auto", **kwargs)
-        figure.colorbar(img, ax=axes)
+        # figure.colorbar(img, ax=axes)
         axes.set_xlim(t[0], t[-1])
         axes.set_ylim(f[0], f[-1])
         if log:
@@ -414,11 +413,13 @@ class signal_proc(object):
         yaxis = axes.yaxis
         yaxis.set_major_formatter(tick.ScalarFormatter())
         xaxis = axes.xaxis
-        xaxis.set_label_text("time [s]")
+
+        plt.ylabel("Frequency [Hz]")
+        plt.xlabel("Time [s]")
         if show:
             plt.show()
         self.save_plot(output_filepath)
 
     def save_plot(self, filepath):
-        plt.savefig(filepath)
+        plt.savefig(filepath, bbox_inches="tight")
         plt.close("all")

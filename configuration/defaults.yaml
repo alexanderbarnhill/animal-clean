@@ -14,6 +14,7 @@ data:
     cache_directory:
 
 training:
+  ckpt_path:
   debugging:
     active: true
     limit_train_batch: 1.0

@@ -34,7 +34,7 @@ data:
 
 training:
   training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/orca"
-  ckpt_path: /cluster/barnhill/code/animal-clean/training_output/animal-clean-D-killer-whale/9nisquk9/checkpoints/epoch=6-step=9541.ckpt
+  ckpt_path: /net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/orca/animal-clean-D-killer-whale/s5jedmt9/checkpoints/epoch=21-step=29986.ckpt
 
 dataset:
 

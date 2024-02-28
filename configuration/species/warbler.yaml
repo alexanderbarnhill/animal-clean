@@ -13,7 +13,7 @@ data:
     human_speech:
       clean: ""
       noisy: ""
-      batch_percentage: 0.5
+      batch_percentage: 0.0
     working_directory:
     cache_directory:
 
@@ -26,7 +26,7 @@ data:
     human_speech:
       clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
       noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.5
+      batch_percentage: 0.0
     working_directory:
     cache_directory:
 
@@ -44,8 +44,8 @@ dataset:
 
   frequency:
     compression: linear      # Method of Frequency Compression. (linear, mel, mfcc)
-    frequency_min: 500       # Default is 500Hz
-    frequency_max: 10000     # Default is 10kHz
+    frequency_min: 3000       # Default is 500Hz
+    frequency_max: 9000     # Default is 10kHz
 
   augmentation:              # Settings for Augmentation
     active: true             # Should Augmentation Be Used (Default: True)
@@ -71,7 +71,7 @@ dataset:
       max_snr: -8
 
     noise_masking:
-      masking_probability: 0.5
+      masking_probability: 0.0
       df: 15.0
       exp_e: 0.1
       bin_pow: 2.0
@@ -86,11 +86,11 @@ dataset:
     sequence_length: 128     # Sequence Length (Default = 128)
 
   fft:
-    n_fft: 4096              # FFT Size (Default 4096)
-    hop: 441                 # FFT Hop (Default 441)
+    n_fft: 512              # FFT Size (Default 4096)
+    hop: 220                 # FFT Hop (Default 441)
 
   normalization:
-    method: min_max
+    method:
 
   signal_detection:          # Use a peak finding mechanism to detect the strongest signal (see: https://github.com/ChristianBergler/ORCA-CLEAN)
     active: true

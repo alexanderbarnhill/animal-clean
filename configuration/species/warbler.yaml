@@ -90,7 +90,7 @@ dataset:
     hop: 220                 # FFT Hop (Default 441)
 
   normalization:
-    method:
+    method: db
 
   signal_detection:          # Use a peak finding mechanism to detect the strongest signal (see: https://github.com/ChristianBergler/ORCA-CLEAN)
     active: true

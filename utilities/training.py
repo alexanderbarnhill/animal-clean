@@ -9,6 +9,8 @@ from data.audiodataset import DatabaseCsvSplit, get_audio_files_from_dir, Datase
 import logging as log
 import torch
 from glob import glob
+import random
+import string
 
 def get_training_directory(opts):
     if opts.training.training_directory is None:
@@ -167,6 +169,24 @@ def get_data_loaders(opts, loc="local", m=None):
 
     return dataloaders
 
+
+def get_run_name(opts, loc="local"):
+    def get_random_string(length):
+        letters = string.ascii_uppercase
+        result_str = ''.join(random.choice(letters) for _ in range(length))
+        return result_str
+
+    name = opts.name
+
+    _, _, batch_percentage = get_human_speech_opts(opts, loc)
+    name += f"-H_{int(batch_percentage * 100)}"
+    dataset_opts = opts.dataset.augmentation
+    masking_opts = dataset_opts.noise_masking
+    masking_probability = masking_opts.masking_probability
+    name += f"-M_{int(masking_probability * 100)}"
+
+    name += f"-{get_random_string(4)}"
+    return name
 
 
 

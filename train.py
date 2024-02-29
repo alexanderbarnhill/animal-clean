@@ -46,10 +46,15 @@ if __name__ == '__main__':
         log.info(f"Adding species-specific configuration from {args.species_configuration}")
 
     configuration = build_configuration(args.defaults, args.species_configuration)
+    in_slurm = "SLURM_JOB_ID" in os.environ
 
+    if in_slurm:
+        log.info(f"Using Cluster Data Configuration")
+    location = "local" if not in_slurm else "cluster"
+
+    run_name = get_run_name(configuration, location)
     log.info("Initializing Model")
     model = AnimalClean(configuration)
-
 
     training_directory = get_training_directory(configuration)
     log.info(f"Putting relevant training output files in {training_directory}")
@@ -60,7 +65,8 @@ if __name__ == '__main__':
         # wandb.login(key=configuration.secrets.monitoring.wandb.api_key)
         logger = pl_loggers.WandbLogger(project=configuration.monitoring_methods.wandb.project + f"-{configuration.name}",
                                         log_model="all",
-                                        save_dir=training_directory)
+                                        save_dir=training_directory,
+                                        name=run_name)
 
         logger.watch(model, log="all")
     else:
@@ -78,10 +84,7 @@ if __name__ == '__main__':
 
     )
 
-    in_slurm = "SLURM_JOB_ID" in os.environ
-    if in_slurm:
-        log.info(f"Using Cluster Data Configuration")
-    location = "local" if not in_slurm else "cluster"
+
 
     if use_human_speech_augmentation(configuration, loc=location):
         model.use_human_speech_augmentation = True

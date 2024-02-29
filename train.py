@@ -66,7 +66,8 @@ if __name__ == '__main__':
         logger = pl_loggers.WandbLogger(project=configuration.monitoring_methods.wandb.project + f"-{configuration.name}",
                                         log_model="all",
                                         save_dir=training_directory,
-                                        name=run_name)
+                                        name=run_name,
+                                        id=run_name)
 
         logger.watch(model, log="all")
     else:

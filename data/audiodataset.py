@@ -496,17 +496,18 @@ class Dataset(AudioDataset):
             **kwargs
     ):
         self.m = m
-        log.info(f"{split} -- {len(file_names)} files")
+        self.logfix = f"[Dataset -- {split}]:"
+        log.info(f"{self.logfix} Using {len(file_names)} files")
         if noise_directory is not None:
-            log.info(f"Looking for noise files in {noise_directory}")
+            log.info(f"{self.logfix} Looking for noise files in {noise_directory}")
             noise_files = glob.glob(noise_directory + f"{os.sep}**{os.sep}*.wav", recursive=True)
         else:
-            log.info(f"No noise directory defined. Not using real world noise")
+            log.info(f"{self.logfix} No noise directory defined. Not using real world noise")
             noise_files = None
         if noise_files is not None:
-            log.info(f"{split} -- {len(noise_files)} noise files")
+            log.info(f"{self.logfix} {len(noise_files)} noise files")
         else:
-            log.info(f"No noise files found.")
+            log.info(f"{self.logfix} No noise files found.")
         dataset_opts = opts.dataset
         data_opts = opts.data
         if loc is None or loc not in data_opts:
@@ -520,7 +521,7 @@ class Dataset(AudioDataset):
         sr = dataset_opts.sample_rate
         super().__init__(file_names, working_dir, sr, *args, **kwargs)
         if self.dataset_name is not None:
-            log.info("Init dataset {}...".format(self.dataset_name))
+            log.info(f"{self.logfix} Initializing dataset {self.dataset_name}...")
 
         self.sp = signal.signal_proc()
 
@@ -535,11 +536,11 @@ class Dataset(AudioDataset):
         self.orig_noise_value = aug_opts.noise_masking.original_noise_value
         self.masking_probability = aug_opts.noise_masking.masking_probability
         if self.masking_probability == 0.0:
-            log.info(f"Creation of Binary Masks disabled")
+            log.info(f"{self.logfix} Creation of Binary Masks disabled")
         elif self.masking_probability == 1.0:
-            log.info(f"Additive noise masking disabled -- only using binary masks")
+            log.info(f"{self.logfix} Additive noise masking disabled -- only using binary masks")
         else:
-            log.info(f"Binary masks will be created with probability {self.masking_probability}")
+            log.info(f"{self.logfix} Binary masks will be created with probability {self.masking_probability}")
 
         self.freq_compression = dataset_opts.frequency.compression
         self.f_min = dataset_opts.frequency.frequency_min
@@ -565,7 +566,7 @@ class Dataset(AudioDataset):
             )
 
         log.debug(
-            "Number of files to denoise : {}".format(len(self.file_names))
+            f"{self.logfix} Number of files to denoise : {len(self.file_names)}"
         )
 
         spec_transforms = [
@@ -586,7 +587,7 @@ class Dataset(AudioDataset):
 
         if self.augmentation:
 
-            log.debug("Init augmentation transforms for intensity, time, and pitch shift")
+            log.debug(f"{self.logfix} Init augmentation transforms for intensity, time, and pitch shift")
             self.t_amplitude = T.RandomAmplitude(
                 increase_db=aug_opts.amplitude_shift.increase_db,
                 decrease_db=aug_opts.amplitude_shift.decrease_db)
@@ -608,7 +609,7 @@ class Dataset(AudioDataset):
                 from_=aug_opts.pitch_shift.from_,
                 to_=aug_opts.pitch_shift.to_
             )
-            log.debug("Running without intensity, time, and pitch augmentation")
+            log.debug(f"{self.logfix} Running without intensity, time, and pitch augmentation")
 
         if self.freq_compression == "linear":
             self.t_compr_f = T.Interpolate(self.n_freq_bins, sr, self.f_min, self.f_max)
@@ -621,7 +622,7 @@ class Dataset(AudioDataset):
             raise "Undefined frequency compression"
 
         if self.noise_files is not None and len(self.noise_files) > 0:
-            log.debug("Init training real-world noise files for noise2noise adding")
+            log.debug(f"{self.logfix} Init training real-world noise files for noise2noise adding")
             self.t_addnoise = T.RandomAddNoise(
                 self.noise_files,
                 self.t_spectrogram,
@@ -639,13 +640,13 @@ class Dataset(AudioDataset):
         min_max_normalize = dataset_opts.normalization.method.lower() == "min_max"
         if min_max_normalize:
             self.t_norm = T.MinMaxNormalize()
-            log.debug("Init min-max-normalization activated")
+            log.debug(f"{self.logfix} Init min-max-normalization activated")
         else:
             self.t_norm = T.Normalize(
                 min_level_db=dataset_opts.min_level_db,
                 ref_level_db=dataset_opts.ref_level_db,
             )
-            log.debug("Init 0/1-dB-normalization activated")
+            log.debug(f"{self.logfix} Init 0/1-dB-normalization activated")
 
         self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=augmentation)
 
@@ -900,7 +901,7 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
                  **kwargs):
 
         super().__init__(split, opts, augmentation, file_names, noise_directory, loc, *args, **kwargs)
-
+        self.logfix = f"[Human Speech Data Augmentation -- {split}]:"
         dataset_opts = opts.dataset
         data_opts = opts.data
         if loc is None or loc not in data_opts:
@@ -910,7 +911,7 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
 
         human_speech = dir_opts.human_speech
 
-        log.info(f"Found {len(file_names)} file pairs for human speech augmentation")
+        log.info(f"{self.logfix} Found {len(file_names)} file pairs for human speech augmentation")
         self.clean_dir = human_speech.clean
         self.noisy_dir = human_speech.noisy
 
@@ -924,7 +925,6 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
             T.PreEmphasize(dataset_opts.pre_emphasis),
             T.Spectrogram(self.n_fft, self.hop, center=False),
         ]
-
 
         self.t_spectrogram = T.Compose(spec_transforms)
 

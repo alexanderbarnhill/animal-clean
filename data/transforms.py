@@ -278,6 +278,9 @@ class RandomTimeStretch(object):
         self.from_ = math.log2(from_)
         self.to_ = math.log2(to_)
 
+        self.logfix = "[Random Time Stretch Augmentation]:"
+        log.info(f"{self.logfix} Stretching time dimension by random factor between 2**Uniform(log2({self.from_}), log2({self._to}))")
+
     def __call__(self, spectrogram: torch.Tensor):
         factor = 2 ** torch.empty((1,)).uniform_(self.from_, self.to_).item()
         return _scale(spectrogram, factor, dim=1)

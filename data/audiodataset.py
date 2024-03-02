@@ -587,28 +587,61 @@ class Dataset(AudioDataset):
 
         if self.augmentation:
 
-            log.debug(f"{self.logfix} Init augmentation transforms for intensity, time, and pitch shift")
-            self.t_amplitude = T.RandomAmplitude(
-                increase_db=aug_opts.amplitude_shift.increase_db,
-                decrease_db=aug_opts.amplitude_shift.decrease_db)
-            self.t_timestretch = T.RandomTimeStretch(
-                from_=aug_opts.time_stretch.from_,
-                to_=aug_opts.time_stretch.to_
-            )
-            self.t_pitchshift = T.RandomPitchSift(
-                from_=aug_opts.pitch_shift.from_,
-                to_=aug_opts.pitch_shift.to_
-            )
+            log.debug(f"{self.logfix} Init augmentation transforms")
+            if aug_opts.amplitude_shift.active:
+
+                self.t_amplitude = T.RandomAmplitude(
+                    increase_db=aug_opts.amplitude_shift.increase_db,
+                    decrease_db=aug_opts.amplitude_shift.decrease_db)
+            else:
+                self.t_amplitude = T.RandomAmplitude(
+                    increase_db=1,
+                    decrease_db=1)
+            if aug_opts.time_shift.active:
+                self.t_timestretch = T.RandomTimeStretch(
+                    from_=aug_opts.time_stretch.from_,
+                    to_=aug_opts.time_stretch.to_
+                )
+            else:
+                self.t_timestretch = T.RandomTimeStretch(
+                    from_=1,
+                    to_=1
+                )
+            if aug_opts.pitch_shift.active:
+
+                self.t_pitchshift = T.RandomPitchSift(
+                    from_=aug_opts.pitch_shift.from_,
+                    to_=aug_opts.pitch_shift.to_
+                )
+            else:
+                self.t_pitchshift = T.RandomPitchSift(
+                    from_=1,
+                    to_=1
+                )
         else:
             # only for noise augmentation during validation phase - intensity, time and pitch augmentation is not used during validation/test
-            self.t_timestretch = T.RandomTimeStretch(
-                from_=aug_opts.time_stretch.from_,
-                to_=aug_opts.time_stretch.to_
-            )
-            self.t_pitchshift = T.RandomPitchSift(
-                from_=aug_opts.pitch_shift.from_,
-                to_=aug_opts.pitch_shift.to_
-            )
+            if aug_opts.time_shift.active:
+                self.t_timestretch = T.RandomTimeStretch(
+                    from_=aug_opts.time_stretch.from_,
+                    to_=aug_opts.time_stretch.to_
+                )
+            else:
+                self.t_timestretch = T.RandomTimeStretch(
+                    from_=1,
+                    to_=1
+                )
+
+            if aug_opts.pitch_shift.active:
+
+                self.t_pitchshift = T.RandomPitchSift(
+                    from_=aug_opts.pitch_shift.from_,
+                    to_=aug_opts.pitch_shift.to_
+                )
+            else:
+                self.t_pitchshift = T.RandomPitchSift(
+                    from_=1,
+                    to_=1
+                )
             log.debug(f"{self.logfix} Running without intensity, time, and pitch augmentation")
 
         if self.freq_compression == "linear":

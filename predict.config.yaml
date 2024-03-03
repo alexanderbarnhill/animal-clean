@@ -8,9 +8,9 @@ visualization:
   img_out:
 
 visualize: true
-input: "/media/alex/Datasets/04_animal-clean/evaluation/bat/input_data"
-output: "/media/alex/Datasets/04_animal-clean/evaluation/bat/output"
+input: "/media/alex/Datasets/04_animal-clean/evaluation/chimp/input_data"
+output: "/media/alex/Datasets/04_animal-clean/evaluation/chimp/output"
 maintain_directory_structure: true
 file_ext:
-model_path: "/media/alex/Datasets/model_storage/ANIMAL-CLEAN/bat/bat-H50-3_v22.ckpt"
+model_path: "/media/alex/Datasets/model_storage/ANIMAL-CLEAN/chimp/chimp-H50-M0-1_best.ckpt"
 sequence_length: 1.28

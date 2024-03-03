@@ -175,13 +175,13 @@ if __name__ == '__main__':
         if oo is None:
             oo = io
 
-
+    device = torch.device("cuda") if torch.cuda.is_available() and configuration.cuda else torch.device("cpu")
     # log.info(json.dumps(dict(configuration), indent=4))
 
-    run_configuration = torch.load(configuration.model_path)
+    run_configuration = torch.load(configuration.model_path, map_location=device)
     species_options = run_configuration["hyper_parameters"]["opts"]
 
-    device = torch.device("cuda") if torch.cuda.is_available() and configuration.cuda else torch.device("cpu")
+
     log.info(f"Restoring model from {configuration.model_path}")
 
     model = AnimalClean.load_from_checkpoint(

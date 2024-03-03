@@ -597,7 +597,7 @@ class Dataset(AudioDataset):
                 self.t_amplitude = T.RandomAmplitude(
                     increase_db=1,
                     decrease_db=1)
-            if aug_opts.time_shift.active:
+            if aug_opts.time_stretch.active:
                 self.t_timestretch = T.RandomTimeStretch(
                     from_=aug_opts.time_stretch.from_,
                     to_=aug_opts.time_stretch.to_
@@ -620,7 +620,7 @@ class Dataset(AudioDataset):
                 )
         else:
             # only for noise augmentation during validation phase - intensity, time and pitch augmentation is not used during validation/test
-            if aug_opts.time_shift.active:
+            if aug_opts.time_stretch.active:
                 self.t_timestretch = T.RandomTimeStretch(
                     from_=aug_opts.time_stretch.from_,
                     to_=aug_opts.time_stretch.to_

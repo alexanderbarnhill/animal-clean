@@ -37,7 +37,7 @@ def convert_tensor_to_PIL(image_tensor, title, transpose=True):
     plt.savefig(buffer, bbox_inches="tight", pad_inches=0)
     buffer.seek(0)
     image = Image.open(buffer)
-    image = resize_image(image)
+    # image = resize_image(image)
     plt.close(fig)
     return image
 

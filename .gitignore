@@ -7,7 +7,7 @@ node_modules
 results/additional_species
 logs
 training_output
-
+tests/test_img
 tmp
 # Created by .ignore support plugin (hsz.mobi)
 wandb

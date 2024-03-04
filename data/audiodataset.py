@@ -800,9 +800,10 @@ class Dataset(AudioDataset):
             foreign_sample = True
             transform_opts = self.transform_opts["foreign"]
 
-        if not self.foreign_masking and not foreign_sample:
+        if not foreign_sample:
             ### SET TRANSFORMS TO TARGET ###
             self.set_transforms("target")
+            transform_opts = self.transform_opts["target"]
 
         if self.working_dir is not None:
             file = os.path.join(self.working_dir, file_name)

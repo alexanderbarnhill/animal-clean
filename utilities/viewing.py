@@ -32,10 +32,8 @@ def convert_tensor_to_PIL(image_tensor, title, transpose=True):
 
     fig, ax = plt.subplots(dpi=60, figsize=(5, 10))
     ax.imshow(image_tensor, origin="lower", interpolation=None)
-    plt.ylabel(os.path.basename(title), fontsize=10)
+    plt.title(os.path.basename(title), fontsize=10)
     plt.axis("off")
-    plt.box(False)
-    plt.margins(x=0, y=0)
     buffer = io.BytesIO()
     plt.savefig(buffer, bbox_inches="tight", pad_inches=0)
     buffer.seek(0)

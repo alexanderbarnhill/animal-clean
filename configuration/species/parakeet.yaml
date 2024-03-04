@@ -57,7 +57,7 @@ dataset:
     time_stretch:            # Stretch a signal by a factor randomly selected in a given range (e.g. 0.5 will halve the signal)
       active: true
       from_: 2.0
-      to_: 2
+      to_: 2.0
 
     pitch_shift:             # Shift the pitch by a factor randomly selected from within a given range
       active: true

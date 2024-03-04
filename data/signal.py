@@ -25,7 +25,7 @@ from skimage import filters
 from skimage import exposure
 
 from visualization import utils as U
-
+import logging as log
 from visualization.cm import apply_cm, viridis_cm
 
 """
@@ -100,6 +100,7 @@ class signal_proc(object):
 
     """ Maximum filter """
     def search_maxima_spec(self, power_spectrogram, radius=3):
+        log.debug(f"Spectrogram shape {power_spectrogram.shape}")
         power_spectrogram_max = power_spectrogram.clone().squeeze(0).transpose(0, 1).numpy()
         image_max = ndi.maximum_filter(power_spectrogram_max, size=radius, mode='nearest')
         image_max = self.np_array_to_tensor(image_max)

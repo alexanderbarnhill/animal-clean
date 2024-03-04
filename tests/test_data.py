@@ -18,7 +18,8 @@ def _show(sample, transpose=True, file_name=None):
 
     fig, ax = plt.subplots(dpi=60)
     plt.imshow(s, origin="lower", interpolation=None)
-
+    if file_name is not None:
+        plt.ylabel(file_name, fontsize=8)
     plt.show()
 
 
@@ -69,7 +70,7 @@ def test_get_human_speech_dataset():
 
 def test_masking_data_selection():
     configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=PARAKEET)
-    configuration.training.batch_size = 4
+    configuration.training.batch_size = 16
     loaders = get_data_loaders(configuration)
     train_loader = loaders["train"]
     assert train_loader is not None
@@ -79,16 +80,14 @@ def test_masking_data_selection():
     ground_truth = y["ground_truth"]
     label = y["file_name"]
     for i in range(ground_truth.shape[0]):
-        _show(ground_truth[i])
-        img = convert_tensor_to_PIL(ground_truth[i], os.path.basename(label[i]))
-        img.show()
+        _show(ground_truth[i], file_name=os.path.basename(label[i]))
     for i in range(x.shape[0]):
-        _show(x[i])
+        _show(x[i], file_name=os.path.basename(label[i]))
 
 
 def test_masking_data_selection_val_test():
     configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=PARAKEET)
-    configuration.training.batch_size = 4
+    configuration.training.batch_size = 16
     loaders = get_data_loaders(configuration)
     train_loader = loaders["train"]
     assert train_loader is not None
@@ -96,10 +95,11 @@ def test_masking_data_selection_val_test():
     assert sample is not None
     x, y = sample
     ground_truth = y["ground_truth"]
+    file_name = y["file_name"]
     for i in range(ground_truth.shape[0]):
-        _show(ground_truth[i])
+        _show(ground_truth[i], file_name=file_name[i])
     for i in range(x.shape[0]):
-        _show(x[i])
+        _show(x[i], file_name=file_name[i])
 
 
 def test_artificial_noise_scaling():

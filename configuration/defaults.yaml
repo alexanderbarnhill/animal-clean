@@ -92,6 +92,7 @@ dataset:
 
     noise_masking:
       masking_probability: 0.5
+      masking_data: "target"
       df: 15.0
       exp_e: 0.1
       bin_pow: 2.0

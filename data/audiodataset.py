@@ -30,6 +30,7 @@ from collections import defaultdict
 from utilities.FileIO import AsyncFileReader
 from typing import Any, Dict, Iterable, List
 import matplotlib.pyplot as plt
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 """
@@ -508,54 +509,71 @@ class Dataset(AudioDataset):
             log.info(f"{self.logfix} {len(noise_files)} noise files")
         else:
             log.info(f"{self.logfix} No noise files found.")
-        dataset_opts = opts.dataset
-        data_opts = opts.data
-        if loc is None or loc not in data_opts:
-            dir_opts = data_opts
+        self.dataset_opts = opts.dataset
+        self.data_opts = opts.data
+        if loc is None or loc not in self.data_opts:
+            dir_opts = self.data_opts
         else:
-            dir_opts = data_opts[loc]
+            dir_opts = self.data_opts[loc]
         working_dir = dir_opts.working_directory
         if working_dir is None:
             working_dir = dir_opts.data_directory
-        cache_dir = dir_opts.cache_directory
-        sr = dataset_opts.sample_rate
-        super().__init__(file_names, working_dir, sr, *args, **kwargs)
+        self.cache_dir = dir_opts.cache_directory
+        self.sr = self.dataset_opts.sample_rate
+        super().__init__(file_names, working_dir, self.sr, *args, **kwargs)
         if self.dataset_name is not None:
             log.info(f"{self.logfix} Initializing dataset {self.dataset_name}...")
 
         self.sp = signal.signal_proc()
 
-        aug_opts = dataset_opts.augmentation
-        self.sample_rate = dataset_opts.sample_rate
-        self.df = aug_opts.noise_masking.df
-        self.exp_e = aug_opts.noise_masking.exp_e
-        self.bin_pow = aug_opts.noise_masking.bin_pow
-        self.gaus_mean = aug_opts.noise_masking.gauss_mean
-        self.gaus_stdv = aug_opts.noise_masking.gauss_std
-        self.poisson_lambda = aug_opts.noise_masking.poisson_lambda
-        self.orig_noise_value = aug_opts.noise_masking.original_noise_value
-        self.masking_probability = aug_opts.noise_masking.masking_probability
+        self.aug_opts = self.dataset_opts.augmentation
+        self.sample_rate = self.dataset_opts.sample_rate
+        self.df = self.aug_opts.noise_masking.df
+        self.exp_e = self.aug_opts.noise_masking.exp_e
+        self.bin_pow = self.aug_opts.noise_masking.bin_pow
+        self.gaus_mean = self.aug_opts.noise_masking.gauss_mean
+        self.gaus_stdv = self.aug_opts.noise_masking.gauss_std
+        self.poisson_lambda = self.aug_opts.noise_masking.poisson_lambda
+        self.orig_noise_value = self.aug_opts.noise_masking.original_noise_value
+        self.masking_probability = self.aug_opts.noise_masking.masking_probability
+        self.do_masking = False
+        self.foreign_masking = False
         if self.masking_probability == 0.0:
             log.info(f"{self.logfix} Creation of Binary Masks disabled")
         elif self.masking_probability == 1.0:
             log.info(f"{self.logfix} Additive noise masking disabled -- only using binary masks")
+            self.do_masking = True
         else:
             log.info(f"{self.logfix} Binary masks will be created with probability {self.masking_probability}")
+            self.do_masking = True
 
-        self.freq_compression = dataset_opts.frequency.compression
-        self.f_min = dataset_opts.frequency.frequency_min
-        self.f_max = dataset_opts.frequency.frequency_max
-        self.n_fft = dataset_opts.fft.n_fft
+        masking_data = self.aug_opts.noise_masking.masking_data
+        # SETUP MASKING DATA
+        if masking_data is not None and masking_data != "target" and os.path.isdir(masking_data):
+            log.info(f"Using alternative data for mask creation")
+            log.info(f"Mask creation data path: {masking_data}")
+            self.masking_data = glob.glob(masking_data + "/**/**/*.wav", recursive=True)
+            self.foreign_masking = True
+        else:
+            log.info(f"Using target data for mask creation")
+            self.masking_data = self.file_names
+        if self.do_masking:
+            log.info(f"Number of files used for masking generation: {len(self.masking_data)}")
+
+        self.freq_compression = self.dataset_opts.frequency.compression
+        self.f_min = self.dataset_opts.frequency.frequency_min
+        self.f_max = self.dataset_opts.frequency.frequency_max
+        self.n_fft = self.dataset_opts.fft.n_fft
         self.random = random
-        self.seq_len = dataset_opts.feature_size.sequence_length
-        self.n_freq_bins = dataset_opts.feature_size.n_freq_bins
-        self.hop_length = dataset_opts.fft.hop
+        self.seq_len = self.dataset_opts.feature_size.sequence_length
+        self.n_freq_bins = self.dataset_opts.feature_size.n_freq_bins
+        self.hop_length = self.dataset_opts.fft.hop
         self.augmentation = augmentation
         self.file_reader = AsyncFileReader()
         self.noise_files = noise_files
-        self.min_thres_detect = dataset_opts.signal_detection.min_thres_detect
-        self.max_thres_detect = dataset_opts.signal_detection.max_thres_detect
-        self.perc_of_max_signal = dataset_opts.signal_detection.perc_of_max_signal
+        self.min_thres_detect = self.dataset_opts.signal_detection.min_thres_detect
+        self.max_thres_detect = self.dataset_opts.signal_detection.max_thres_detect
+        self.perc_of_max_signal = self.dataset_opts.signal_detection.perc_of_max_signal
 
         valid_freq_compressions = ["linear", "mel", "mfcc"]
 
@@ -568,50 +586,101 @@ class Dataset(AudioDataset):
         log.debug(
             f"{self.logfix} Number of files to denoise : {len(self.file_names)}"
         )
+        self.transform_opts = {
+            "target": {
+                "sr": self.sample_rate,
+                "pre_emphasis": self.dataset_opts.pre_emphasis,
+                "n_fft": self.n_fft,
+                "hop_length": self.hop_length,
+                "amplitude_active": self.aug_opts.amplitude_shift.active,
+                "increase_db": self.aug_opts.amplitude_shift.increase_db,
+                "decrease_db": self.aug_opts.amplitude_shift.decrease_db,
+                "time_active": self.aug_opts.time_stretch.active,
+                "time_from": self.aug_opts.time_stretch.from_,
+                "time_to": self.aug_opts.time_stretch.to_,
+                "pitch_active": self.aug_opts.pitch_shift.active,
+                "pitch_from": self.aug_opts.pitch_shift.from_,
+                "pitch_to": self.aug_opts.pitch_shift.to_,
+                "max_snr": self.aug_opts.noise_addition.max_snr,
+                "min_snr": self.aug_opts.noise_addition.min_snr,
+                "min_level_db": self.dataset_opts.min_level_db,
+                "ref_level_db": self.dataset_opts.ref_level_db,
+                "normalize": self.dataset_opts.normalization.method,
+                "f_min": self.f_min,
+                "f_max": self.f_max
+            },
+            ### USE ORCA SETTINGS TODO MOVE THIS
+            "foreign": {
+                "sr": 44100,
+                "pre_emphasis": 0.98,
+                "n_fft": 4096,
+                "hop_length": 441,
+                "amplitude_active": True,
+                "increase_db": 3,
+                "decrease_db": -6,
+                "time_active": True,
+                "time_from": 0.5,
+                "time_to": 2,
+                "pitch_active": True,
+                "pitch_from": 0.5,
+                "pitch_to": 1.5,
+                "max_snr": -2,
+                "min_snr": -8,
+                "min_level_db": -100,
+                "ref_level_db": 20,
+                "normalize": "db",
+                "f_min": 500,
+                "f_max": 10000
+            }
+        }
 
+        self.set_transforms(source="target")
+
+    def set_transforms(self, source="target"):
+        transform_opts = self.transform_opts[source]
         spec_transforms = [
-            lambda fn: T.load_audio_file(fn, sr=sr),
-            T.PreEmphasize(dataset_opts.pre_emphasis),
-            T.Spectrogram(self.n_fft, self.hop_length, center=False),
+            lambda fn: T.load_audio_file(fn, sr=transform_opts["sr"]),
+            T.PreEmphasize(transform_opts["pre_emphasis"]),
+            T.Spectrogram(transform_opts["n_fft"], transform_opts["hop_length"], center=False),
         ]
 
-        if cache_dir is None:
+        if self.cache_dir is None:
             self.t_spectrogram = T.Compose(spec_transforms)
         else:
             self.t_spectrogram = T.CachedSpectrogram(
-                cache_dir=cache_dir,
+                cache_dir=self.cache_dir,
                 spec_transform=T.Compose(spec_transforms),
-                n_fft=self.n_fft,
-                hop_length=self.hop_length,
+                n_fft=transform_opts["n_fft"],
+                hop_length=transform_opts["hop_length"],
                 file_reader=self.file_reader)
 
         if self.augmentation:
 
             log.debug(f"{self.logfix} Init augmentation transforms")
-            if aug_opts.amplitude_shift.active:
+            if transform_opts["amplitude_active"]:
 
                 self.t_amplitude = T.RandomAmplitude(
-                    increase_db=aug_opts.amplitude_shift.increase_db,
-                    decrease_db=aug_opts.amplitude_shift.decrease_db)
+                    increase_db=transform_opts["increase_db"],
+                    decrease_db=transform_opts["decrease_db"])
             else:
                 self.t_amplitude = T.RandomAmplitude(
                     increase_db=1,
                     decrease_db=1)
-            if aug_opts.time_stretch.active:
+            if transform_opts["time_active"]:
                 self.t_timestretch = T.RandomTimeStretch(
-                    from_=aug_opts.time_stretch.from_,
-                    to_=aug_opts.time_stretch.to_
+                    from_=transform_opts["time_from"],
+                    to_=transform_opts["time_to"]
                 )
             else:
                 self.t_timestretch = T.RandomTimeStretch(
                     from_=1,
                     to_=1
                 )
-            if aug_opts.pitch_shift.active:
+            if transform_opts["pitch_active"]:
 
                 self.t_pitchshift = T.RandomPitchSift(
-                    from_=aug_opts.pitch_shift.from_,
-                    to_=aug_opts.pitch_shift.to_
+                    from_=transform_opts["pitch_from"],
+                    to_=transform_opts["pitch_to"]
                 )
             else:
                 self.t_pitchshift = T.RandomPitchSift(
@@ -620,10 +689,10 @@ class Dataset(AudioDataset):
                 )
         else:
             # only for noise augmentation during validation phase - intensity, time and pitch augmentation is not used during validation/test
-            if aug_opts.time_stretch.active:
+            if transform_opts["time_active"]:
                 self.t_timestretch = T.RandomTimeStretch(
-                    from_=aug_opts.time_stretch.from_,
-                    to_=aug_opts.time_stretch.to_
+                    from_=transform_opts["time_from"],
+                    to_=transform_opts["time_to"]
                 )
             else:
                 self.t_timestretch = T.RandomTimeStretch(
@@ -631,11 +700,11 @@ class Dataset(AudioDataset):
                     to_=1
                 )
 
-            if aug_opts.pitch_shift.active:
+            if transform_opts["pitch_active"]:
 
                 self.t_pitchshift = T.RandomPitchSift(
-                    from_=aug_opts.pitch_shift.from_,
-                    to_=aug_opts.pitch_shift.to_
+                    from_=transform_opts["pitch_from"],
+                    to_=transform_opts["pitch_to"]
                 )
             else:
                 self.t_pitchshift = T.RandomPitchSift(
@@ -645,11 +714,11 @@ class Dataset(AudioDataset):
             log.debug(f"{self.logfix} Running without intensity, time, and pitch augmentation")
 
         if self.freq_compression == "linear":
-            self.t_compr_f = T.Interpolate(self.n_freq_bins, sr, self.f_min, self.f_max)
+            self.t_compr_f = T.Interpolate(256, transform_opts["sr"], transform_opts["f_min"], transform_opts["f_max"])
         elif self.freq_compression == "mel":
-            self.t_compr_f = T.F2M(sr=sr, n_mels=self.n_freq_bins, f_min=self.f_min, f_max=self.f_max)
+            self.t_compr_f = T.F2M(sr=transform_opts["sr"], n_mels=256, f_min=transform_opts["f_min"], f_max=transform_opts["f_max"])
         elif self.freq_compression == "mfcc":
-            self.t_compr_f = T.Compose(T.F2M(sr=sr, n_mels=self.n_freq_bins, f_min=self.f_min, f_max=self.f_max))
+            self.t_compr_f = T.Compose(T.F2M(sr=transform_opts["sr"], n_mels=256, f_min=transform_opts["f_min"], f_max=transform_opts["f_max"]))
             self.t_compr_mfcc = T.M2MFCC(n_mfcc=32)
         else:
             raise "Undefined frequency compression"
@@ -661,35 +730,34 @@ class Dataset(AudioDataset):
                 self.t_spectrogram,
                 T.Compose(self.t_timestretch, self.t_pitchshift, self.t_compr_f),
                 min_length=self.seq_len,
-                min_snr=aug_opts.noise_addition.min_snr,
-                max_snr=aug_opts.noise_addition.max_snr,
+                min_snr=transform_opts["min_snr"],
+                max_snr=transform_opts["max_snr"],
                 return_original=True
             )
         else:
             self.t_addnoise = None
 
-        self.t_compr_a = T.Amp2Db(min_level_db=dataset_opts.min_level_db)
+        self.t_compr_a = T.Amp2Db(min_level_db=transform_opts["min_level_db"])
 
-        min_max_normalize = dataset_opts.normalization.method.lower() == "min_max"
+        min_max_normalize = transform_opts["normalize"] == "min_max"
         if min_max_normalize:
             self.t_norm = T.MinMaxNormalize()
             log.debug(f"{self.logfix} Init min-max-normalization activated")
         else:
             self.t_norm = T.Normalize(
-                min_level_db=dataset_opts.min_level_db,
-                ref_level_db=dataset_opts.ref_level_db,
+                min_level_db=transform_opts["min_level_db"],
+                ref_level_db=transform_opts["ref_level_db"],
             )
             log.debug(f"{self.logfix} Init 0/1-dB-normalization activated")
 
-        self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=augmentation)
+        self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=self.augmentation)
 
-
-    """
-    Computes per filename the entire data preprocessing pipeline containing all transformations and returns the
-    preprocessed sample as well as the ground truth label 
-    """
 
     def __getitem__(self, idx):
+        """
+            Computes per filename the entire data preprocessing pipeline containing all transformations and returns the
+            preprocessed sample as well as the ground truth label
+        """
         self.clone = False
         self.orig_noise = False
         self.binary_orig = False
@@ -697,7 +765,43 @@ class Dataset(AudioDataset):
         self.binary_ones_pow = False
         self.binary_orig_pow = False
 
+        min_dist = 0 if self.noise_files is not None and len(
+            self.noise_files) > 0 and self.t_addnoise is not None else 1
+
+        noise_method = random.random()
+        if noise_method < self.masking_probability and self.do_masking:
+            # Do Masking Only
+            min_dist = 6
+            max_dist = 9
+        else:
+            if min_dist == 1 and self.do_masking:
+                # Additive noise not possible. Do masking
+                max_dist = 9
+            elif min_dist == 1 and not self.do_masking:
+                max_dist = 5
+            else:
+                # Additive noise is possible, Min dist is 0, Max dist is 0
+                max_dist = 0
+
+        distribution_idx = random.randint(min_dist, max_dist)
         file_name = self.file_names[idx]
+
+        foreign_sample = False
+        transform_opts = self.transform_opts["target"]
+        if 6 <= distribution_idx <= 9 and self.foreign_masking:
+            idx = random.randint(0, len(self.masking_data) - 1)
+            file_name = self.masking_data[idx]
+            ### SET TRANSFORMS TO ORCA ###
+            self.set_transforms("foreign")
+            foreign_sample = True
+            transform_opts = self.transform_opts["foreign"]
+
+        if not self.foreign_masking and not foreign_sample:
+            ### SET TRANSFORMS TO TARGET ###
+            self.set_transforms("target")
+
+
+
 
         if self.working_dir is not None:
             file = os.path.join(self.working_dir, file_name)
@@ -706,8 +810,6 @@ class Dataset(AudioDataset):
 
         sample, _ = self.t_spectrogram(file)
         sample_spec = sample.clone()
-
-
 
         # Data augmentation
         if self.augmentation:
@@ -743,28 +845,11 @@ class Dataset(AudioDataset):
         ground_truth = self.t_compr_a(ground_truth)
         ground_truth = self.t_norm(ground_truth)
 
-
-
         # ARTF PART
-        min_dist = 0 if self.noise_files is not None and len(
-            self.noise_files) > 0 and self.t_addnoise is not None else 1
 
-        noise_method = random.random()
-        if noise_method < self.masking_probability:
-            # Do Masking Only
-            min_dist = 6
-            max_dist = 9
-        else:
-            if min_dist == 1:
-                # Additive noise not possible. Do masking
-                max_dist = 9
-            else:
-                # Additive noise is possible, Min dist is 0, Max dist is 0
-                max_dist = 0
-
-        distribution_idx = random.randint(min_dist, max_dist)
         if self.m is not None:
             distribution_idx = self.m
+
         if distribution_idx != 0:
             sample_spec = self.t_compr_a(sample_spec)
 
@@ -838,10 +923,10 @@ class Dataset(AudioDataset):
             # amplitude and normalized
             sample_spec_n = binary_input.clone()
             binary_mask = self.sp.create_mask(
-                sr=self.sample_rate,
-                fmax=self.f_max,
-                fmin=self.f_min,
-                nfft=self.n_fft,
+                sr=transform_opts["sr"],
+                fmax=transform_opts["f_max"],
+                fmin=transform_opts["f_min"],
+                nfft=transform_opts["n_fft"],
                 trainable_spectrogram=sample_spec_n
             ).unsqueeze(dim=0)
             ground_truth = binary_input * binary_mask
@@ -852,10 +937,10 @@ class Dataset(AudioDataset):
         elif self.binary_ones_pow:
             sample_spec_n = binary_input.clone()
             binary_mask = self.sp.create_mask(
-                sr=self.sample_rate,
-                fmax=self.f_max,
-                fmin=self.f_min,
-                nfft=self.n_fft,
+                sr=transform_opts["sr"],
+                fmax=transform_opts["f_max"],
+                fmin=transform_opts["f_min"],
+                nfft=transform_opts["n_fft"],
                 trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
             ground_truth = binary_input + binary_mask
             ground_truth[ground_truth >= 1.0] = 1.0
@@ -867,10 +952,10 @@ class Dataset(AudioDataset):
         elif self.binary_orig_pow:
             sample_spec_n = binary_input.clone()
             binary_mask = self.sp.create_mask(
-                sr=self.sample_rate,
-                fmax=self.f_max,
-                fmin=self.f_min,
-                nfft=self.n_fft,
+                sr=transform_opts["sr"],
+                fmax=transform_opts["f_max"],
+                fmin=transform_opts["f_min"],
+                nfft=transform_opts["n_fft"],
                 trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
             ground_truth = binary_input + binary_mask
             ground_truth[ground_truth >= 1.0] = 0.0
@@ -883,10 +968,10 @@ class Dataset(AudioDataset):
         elif self.binary_mask:
             sample_spec_n = binary_input.clone()
             binary_mask = self.sp.create_mask(
-                sr=self.sample_rate,
-                fmax=self.f_max,
-                fmin=self.f_min,
-                nfft=self.n_fft,
+                sr=transform_opts["sr"],
+                fmax=transform_opts["f_max"],
+                fmin=transform_opts["f_min"],
+                nfft=transform_opts["n_fft"],
                 trainable_spectrogram=sample_spec_n).unsqueeze(dim=0)
             ground_truth = binary_mask
             ground_truth = self.t_compr_f(ground_truth)
@@ -894,7 +979,11 @@ class Dataset(AudioDataset):
             sample_spec_n = self.t_compr_a(sample_spec_n)
             sample_spec_n = self.t_norm(sample_spec_n)
         else:
-            sample_spec_n = sample_spec + distribution
+            distribution_factor = 1.0
+            if not self.do_masking:
+                ## Crank up artificial noise by random factor
+                distribution_factor = random.randint(1, 3)
+            sample_spec_n = sample_spec + (distribution_factor * distribution)
             sample_spec_n = self.t_norm(sample_spec_n)
 
         label = self.load_label(file)
@@ -949,9 +1038,9 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
         self.noisy_dir = human_speech.noisy
 
         self.clean_files = file_names
-        self.n_fft = dataset_opts.fft.n_fft
-        self.hop = dataset_opts.fft.hop
-        self.sr = dataset_opts.sample_rate
+        self.n_fft = 1024
+        self.hop = 110
+        self.sr = 44100
 
         spec_transforms = [
             lambda fn: T.load_audio_file(fn, sr=self.sr),
@@ -962,7 +1051,7 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
         self.t_spectrogram = T.Compose(spec_transforms)
 
         self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=False)
-        self.t_compr_f = T.Interpolate(self.n_freq_bins, self.sr, 50, 10000)
+        self.t_compr_f = T.Interpolate(self.n_freq_bins, self.sr, 0, 2500)
 
     def _prep_file(self, file):
         sample, _ = self.t_spectrogram(file)
@@ -987,7 +1076,6 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
 
         return sample
 
-
     def __getitem__(self, sample):
         clean_file = self.clean_files[sample]
         noisy_file = self.noisy_files[sample]
@@ -998,7 +1086,6 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
             "ground_truth": clean_sample
         }
         return noisy_sample, label
-
 
     def __len__(self):
         return len(self.clean_files)
@@ -1205,7 +1292,5 @@ class SingleAudioFolder(AudioDataset):
 
         sample_spec = self.t_subseq(sample_spec)
         sample_spec_cmplx = self.t_subseq(sample_spec_cmplx)
-
-
 
         return sample_spec_orig, sample_spec, sample_spec_cmplx, file_name

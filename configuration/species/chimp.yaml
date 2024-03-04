@@ -26,7 +26,7 @@ data:
     human_speech:
       clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
       noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.25
+      batch_percentage: 0.5
     working_directory:
     cache_directory:
 
@@ -70,7 +70,8 @@ dataset:
       max_snr: 12
 
     noise_masking:
-      masking_probability: 0.0
+      masking_probability: 0.5
+      masking_data: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/orca/signal/AOEC"
       df: 15.0
       exp_e: 0.1
       bin_pow: 2.0

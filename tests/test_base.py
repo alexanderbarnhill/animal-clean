@@ -16,6 +16,8 @@ BAT = os.path.join(SPECIES_BASE, "bat.yaml")
 PARAKEET = os.path.join(SPECIES_BASE, "parakeet.yaml")
 WARBLER = os.path.join(SPECIES_BASE, "warbler.yaml")
 
+TEST_IMG_BASE = "/home/alex/git/animal-clean/tests/test_img"
+
 
 class _DummyModel(nn.Module):
     def __init__(self, *args, **kwargs):

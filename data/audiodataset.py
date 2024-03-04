@@ -809,6 +809,7 @@ class Dataset(AudioDataset):
         else:
             file = file_name
 
+        log.debug(f"{self.logfix} File IDX: {idx}, File: {file}")
         sample, _ = self.t_spectrogram(file)
         sample_spec = sample.clone()
 

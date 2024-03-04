@@ -22,11 +22,11 @@ args = parser.parse_args()
 if __name__ == '__main__':
     log_format = log.Formatter(fmt="%(asctime)s [%(levelname)-5.5s] %(message)s")
     rootLogger = log.getLogger()
-    rootLogger.setLevel(log.DEBUG)
+    rootLogger.setLevel(log.INFO)
 
     consoleHandler = log.StreamHandler()
     consoleHandler.setFormatter(log_format)
-    consoleHandler.setLevel(log.DEBUG)
+    consoleHandler.setLevel(log.INFO)
     consoleHandler.setStream(sys.stdout)
 
     os.makedirs(args.log_output, exist_ok=True)
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         filename=os.path.join(args.log_output, f"train_{datetime.strftime(datetime.now(), '%Y-%m-%d_%H-%M-%S')}.log"),
         mode="w")
     fileHandler.setFormatter(log_format)
-    fileHandler.setLevel(log.DEBUG)
+    fileHandler.setLevel(log.INFO)
 
     rootLogger.addHandler(consoleHandler)
     rootLogger.addHandler(fileHandler)

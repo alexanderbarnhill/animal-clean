@@ -85,8 +85,6 @@ if __name__ == '__main__':
 
     )
 
-
-
     if use_human_speech_augmentation(configuration, loc=location):
         model.use_human_speech_augmentation = True
         model.human_speech_loader = get_human_speech_loader(configuration, loc=location)

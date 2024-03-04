@@ -12,6 +12,7 @@ from glob import glob
 import random
 import string
 
+
 def get_training_directory(opts):
     if opts.training.training_directory is None:
         path = os.path.join(os.path.join(os.path.dirname(__file__), ".."), "training_output")
@@ -48,6 +49,7 @@ def get_audio_files(input_data, data_dir):
             exit(1)
     return audio_files
 
+
 def get_human_speech_opts(opts, loc="local"):
     if "human_speech" in opts.data:
         clean_dir = opts.data.human_speech.clean
@@ -65,8 +67,9 @@ def get_human_speech_opts(opts, loc="local"):
     if clean_dir is None or noisy_dir is None:
         return None, None, 0.0
 
-
     return clean_dir, noisy_dir, batch_percentage
+
+
 def get_human_speech_loader(opts, loc="local"):
     clean_dir, noisy_dir, batch_percentage = get_human_speech_opts(opts, loc)
 

@@ -28,6 +28,7 @@ from types import GeneratorType
 import logging as log
 from collections import defaultdict
 from utilities.FileIO import AsyncFileReader
+import json
 from typing import Any, Dict, Iterable, List
 import matplotlib.pyplot as plt
 
@@ -635,6 +636,10 @@ class Dataset(AudioDataset):
         }
 
         self.set_transforms(source="target")
+        log.info(f"Target Settings:")
+        log.info(f"{json.dumps(self.transform_opts['target'], index=4)}")
+        log.info(f"Foreign Masking Settings:")
+        log.info(f"{json.dumps(self.transform_opts['foreign'], index=4)}")
 
     def set_transforms(self, source="target"):
         transform_opts = self.transform_opts[source]

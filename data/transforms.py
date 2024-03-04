@@ -8,6 +8,7 @@ Last Access: 26.04.2022
 
 import io
 import os
+import random
 import sys
 import math
 import resampy
@@ -279,10 +280,11 @@ class RandomTimeStretch(object):
         self.to_ = math.log2(to_)
 
         self.logfix = "[Random Time Stretch Augmentation]:"
-        # # log.info(f"{self.logfix} Stretching time dimension by random factor between 2**Uniform(log2({self.from_}), log2({self.to_}))")
+        log.debug(f"{self.logfix} Stretching time dimension by random factor between 2**Uniform(log2({self.from_}), log2({self.to_}))")
 
     def __call__(self, spectrogram: torch.Tensor):
-        factor = 2 ** torch.empty((1,)).uniform_(self.from_, self.to_).item()
+        factor = 2 ** random.uniform(self.from_, self.to_)
+        # factor = 2 ** torch.empty((1,)).uniform_(self.from_, self.to_).item()
         log.debug(f"{self.logfix} Scaling by factor: {factor}")
 
         scaled = _scale(spectrogram, factor, dim=1)

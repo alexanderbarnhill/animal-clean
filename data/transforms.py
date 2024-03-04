@@ -283,7 +283,11 @@ class RandomTimeStretch(object):
 
     def __call__(self, spectrogram: torch.Tensor):
         factor = 2 ** torch.empty((1,)).uniform_(self.from_, self.to_).item()
-        return _scale(spectrogram, factor, dim=1)
+        log.debug(f"{self.logfix} Scaling by factor: {factor}")
+
+        scaled = _scale(spectrogram, factor, dim=1)
+        log.debug(f"{self.logfix} Input Shape: {spectrogram.shape}, Output Shape: {scaled.shape}")
+        return scaled
 
 """Randomly scaling (uniform distributed) the amplitude based on a given input spectrogram (intensity augmenation)."""
 class RandomAmplitude(object):

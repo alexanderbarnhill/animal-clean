@@ -133,24 +133,28 @@ def test_combine_dataloaders():
     human_batch = next(iter(h_loader))
     x, y = train_batch
     ground_truth = y["ground_truth"]
+    file_names = y["file_name"]
     h_x, h_y = human_batch
     h_gt = h_y["ground_truth"]
+    h_l = h_y["file_name"]
 
     x_c = torch.concat([x, h_x], dim=0)
     gt_c = torch.concat([ground_truth, h_gt], dim=0)
+    file_names += h_l
 
     x = x_c.clone()
     ground_truth = gt_c.clone()
 
     idxs = list(range(0, x.shape[0]))
     random.shuffle(idxs)
-
+    all_names = []
     for i, idx in enumerate(idxs):
         x[i] = x_c[idx]
         ground_truth[i] = gt_c[idx]
+        all_names.append(file_names[idx])
 
     for i in idxs:
-        img = convert_tensor_to_PIL(image_tensor=ground_truth[i])
+        img = convert_tensor_to_PIL(image_tensor=ground_truth[i], title=all_names[i])
         img.show()
 
 

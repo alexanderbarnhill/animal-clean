@@ -1107,7 +1107,8 @@ class HumanSpeechBatchAugmentationDataset(Dataset):
         clean_sample = self._prep_file(clean_file)
         noisy_sample = self._prep_file(noisy_file)
         label = {
-            "ground_truth": clean_sample
+            "ground_truth": clean_sample,
+            "file_name": self.clean_files[sample]
         }
         return noisy_sample, label
 

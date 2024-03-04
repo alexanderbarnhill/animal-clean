@@ -70,6 +70,8 @@ class AnimalClean(pl.LightningModule):
             h_x, h_y = next(iter(self.human_speech_loader))
             h_x = h_x.to(self.device)
             h_gt = h_y["ground_truth"]
+            h_l = h_y["file_name"]
+            file_names += h_l
             h_gt = h_gt.to(self.device)
             x_c = torch.concat([x, h_x], dim=0)
             gt_c = torch.concat([ground_truth, h_gt], dim=0)
@@ -79,20 +81,23 @@ class AnimalClean(pl.LightningModule):
 
             idxs = list(range(0, x.shape[0]))
             random.shuffle(idxs)
-
+            all_names = []
             for i, idx in enumerate(idxs):
                 x[i] = x_c[idx]
                 ground_truth[i] = gt_c[idx]
+                all_names.append(file_names[idx])
 
             x = x.to(self.device)
             ground_truth = ground_truth.to(self.device)
+        else:
+            all_names = file_names
 
         output = self.model(x)
         loss = self.criterion(output, ground_truth)
 
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "train")
-        self._set_samples(x, ground_truth, output, file_names, "train")
+        self._set_samples(x, ground_truth, output, all_names, "train")
         return loss
 
     def validation_step(self, batch, batch_idx):

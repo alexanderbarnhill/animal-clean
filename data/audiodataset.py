@@ -637,9 +637,9 @@ class Dataset(AudioDataset):
 
         self.set_transforms(source="target")
         log.info(f"Target Settings:")
-        log.info(f"{json.dumps(self.transform_opts['target'], index=4)}")
+        log.info(f"{json.dumps(self.transform_opts['target'], indent=4)}")
         log.info(f"Foreign Masking Settings:")
-        log.info(f"{json.dumps(self.transform_opts['foreign'], index=4)}")
+        log.info(f"{json.dumps(self.transform_opts['foreign'], indent=4)}")
 
     def set_transforms(self, source="target"):
         transform_opts = self.transform_opts[source]

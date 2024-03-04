@@ -23,6 +23,7 @@ def _show(sample, transpose=True, file_name=None):
 
 
 
+
 def test_get_data_loaders():
     configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=ORCA)
     loaders = get_data_loaders(configuration)
@@ -76,8 +77,11 @@ def test_masking_data_selection():
     assert sample is not None
     x, y = sample
     ground_truth = y["ground_truth"]
+    label = y["file_name"]
     for i in range(ground_truth.shape[0]):
         _show(ground_truth[i])
+        img = convert_tensor_to_PIL(ground_truth[i], os.path.basename(label[i]))
+        img.show()
     for i in range(x.shape[0]):
         _show(x[i])
 

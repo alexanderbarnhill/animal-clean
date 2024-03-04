@@ -13,7 +13,7 @@ def save_image_tensor(image_tensor, output, transpose=True):
     image_tensor = image_tensor.cpu()
     image_tensor = image_tensor.numpy()
 
-    fig, ax = plt.subplots(dpi=60, figsize=(5, 10))
+    fig, ax = plt.subplots(dpi=60)
     ax.imshow(image_tensor, origin="lower", interpolation=None)
     plt.axis("off")
     plt.savefig(output, bbox_inches="tight")

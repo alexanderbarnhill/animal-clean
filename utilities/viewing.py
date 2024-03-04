@@ -1,6 +1,7 @@
 import io
 from PIL import Image
 import matplotlib.pyplot as plt
+import os
 
 
 def save_image_tensor(image_tensor, output, transpose=True):
@@ -29,9 +30,9 @@ def convert_tensor_to_PIL(image_tensor, title, transpose=True):
     image_tensor = image_tensor.cpu()
     image_tensor = image_tensor.numpy()
 
-    fig, ax = plt.subplots(dpi=60)
+    fig, ax = plt.subplots(dpi=60, figsize=(5, 10))
     ax.imshow(image_tensor, origin="lower", interpolation=None)
-    plt.title(title, fontsize=10)
+    plt.ylabel(os.path.basename(title), fontsize=10)
     plt.axis("off")
     plt.box(False)
     plt.margins(x=0, y=0)

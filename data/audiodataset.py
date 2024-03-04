@@ -991,7 +991,7 @@ class Dataset(AudioDataset):
 
         label["ground_truth"] = ground_truth
         label["file_name"] = label["file_name"].replace(label["file_name"].rsplit("/", 1)[1],
-                                                        str(distribution_idx) + "_" + label["file_name"].rsplit("/", 1)[
+                                                        self.get_dist_label(distribution_idx)+ "_" + label["file_name"].rsplit("/", 1)[
                                                             1])
 
         return sample_spec_n, label
@@ -1007,6 +1007,27 @@ class Dataset(AudioDataset):
         label["call"] = True
         return label
 
+    def get_dist_label(self, label):
+        if label == 0:
+            return "real"
+        elif label == 1:
+            return "Chi2"
+        elif label == 2:
+            return "Pois"
+        elif label == 3:
+            return "Exp"
+        elif label == 4:
+            return "Gauss"
+        elif label == 5:
+            return "Hist"
+        elif label == 6:
+            return "BinXOrig"
+        elif label == 7:
+            return "Bin1sPow"
+        elif label == 8:
+            return "BinOPow"
+        else:
+            return "Bin"
 
 
     def get_sample_with_augmentation(self, sample_idx, augmentation):

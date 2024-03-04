@@ -499,6 +499,7 @@ class Dataset(AudioDataset):
     ):
         self.m = m
         self.logfix = f"[Dataset -- {split}]:"
+        self.mode = split
         log.info(f"{self.logfix} Using {len(file_names)} files")
         if noise_directory is not None:
             log.info(f"{self.logfix} Looking for noise files in {noise_directory}")
@@ -558,6 +559,10 @@ class Dataset(AudioDataset):
         else:
             log.info(f"Using target data for mask creation")
             self.masking_data = self.file_names
+
+        self.do_masking = ((self.mode == "train" and self.foreign_masking and self.do_masking) or
+                           (not self.foreign_masking and self.do_masking))
+
         if self.do_masking:
             log.info(f"Number of files used for masking generation: {len(self.masking_data)}")
 
@@ -721,9 +726,11 @@ class Dataset(AudioDataset):
         if self.freq_compression == "linear":
             self.t_compr_f = T.Interpolate(256, transform_opts["sr"], transform_opts["f_min"], transform_opts["f_max"])
         elif self.freq_compression == "mel":
-            self.t_compr_f = T.F2M(sr=transform_opts["sr"], n_mels=256, f_min=transform_opts["f_min"], f_max=transform_opts["f_max"])
+            self.t_compr_f = T.F2M(sr=transform_opts["sr"], n_mels=256, f_min=transform_opts["f_min"],
+                                   f_max=transform_opts["f_max"])
         elif self.freq_compression == "mfcc":
-            self.t_compr_f = T.Compose(T.F2M(sr=transform_opts["sr"], n_mels=256, f_min=transform_opts["f_min"], f_max=transform_opts["f_max"]))
+            self.t_compr_f = T.Compose(T.F2M(sr=transform_opts["sr"], n_mels=256, f_min=transform_opts["f_min"],
+                                             f_max=transform_opts["f_max"]))
             self.t_compr_mfcc = T.M2MFCC(n_mfcc=32)
         else:
             raise "Undefined frequency compression"
@@ -757,7 +764,6 @@ class Dataset(AudioDataset):
 
         self.t_subseq = T.PaddedSubsequenceSampler(self.seq_len, dim=1, random=self.augmentation)
 
-
     def __getitem__(self, idx):
         """
             Computes per filename the entire data preprocessing pipeline containing all transformations and returns the
@@ -779,14 +785,7 @@ class Dataset(AudioDataset):
             min_dist = 6
             max_dist = 9
         else:
-            if min_dist == 1 and self.do_masking:
-                # Additive noise not possible. Do masking
-                max_dist = 9
-            elif min_dist == 1 and not self.do_masking:
-                max_dist = 5
-            else:
-                # Additive noise is possible, Min dist is 0, Max dist is 0
-                max_dist = 0
+            max_dist = 5
 
         distribution_idx = random.randint(min_dist, max_dist)
         file_name = self.file_names[idx]
@@ -804,9 +803,6 @@ class Dataset(AudioDataset):
         if not self.foreign_masking and not foreign_sample:
             ### SET TRANSFORMS TO TARGET ###
             self.set_transforms("target")
-
-
-
 
         if self.working_dir is not None:
             file = os.path.join(self.working_dir, file_name)
@@ -1010,6 +1006,8 @@ class Dataset(AudioDataset):
         label["file_name"] = file_name
         label["call"] = True
         return label
+
+
 
     def get_sample_with_augmentation(self, sample_idx, augmentation):
         self.m = augmentation

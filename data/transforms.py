@@ -279,7 +279,7 @@ class RandomTimeStretch(object):
         self.to_ = math.log2(to_)
 
         self.logfix = "[Random Time Stretch Augmentation]:"
-        log.info(f"{self.logfix} Stretching time dimension by random factor between 2**Uniform(log2({self.from_}), log2({self.to_}))")
+        # # log.info(f"{self.logfix} Stretching time dimension by random factor between 2**Uniform(log2({self.from_}), log2({self.to_}))")
 
     def __call__(self, spectrogram: torch.Tensor):
         factor = 2 ** torch.empty((1,)).uniform_(self.from_, self.to_).item()
@@ -295,7 +295,7 @@ class RandomAmplitude(object):
             decrease_db *= -1
         self.dec_db = decrease_db
         self.logfix = "[Random Amplitude Augmentation]:"
-        log.info(f"{self.logfix} random amplitude augmentation between {self.inc_db}dB and {self.dec_db}dB")
+        # log.info(f"{self.logfix} random amplitude augmentation between {self.inc_db}dB and {self.dec_db}dB")
 
     def __call__(self, spec):
         db_change = torch.randint(
@@ -332,7 +332,7 @@ class RandomAddNoise(object):
         self.t_pad = PaddedSubsequenceSampler(sequence_length=min_length, dim=1)
         self.min_snr = min_snr if min_snr > max_snr else max_snr
         self.max_snr = max_snr if min_snr > max_snr else min_snr
-        log.info(f"{self.logfix} Adding noise with SNR between {self.min_snr} and {self.max_snr}")
+        # log.info(f"{self.logfix} Adding noise with SNR between {self.min_snr} and {self.max_snr}")
 
         self.return_original = return_original
 
@@ -453,7 +453,7 @@ class Interpolate(object):
         self.sr = sr
         self.f_min = f_min
         self.f_max = f_max
-        log.info(f"Interpolating from {self.f_min} to {self.f_max} using {self.n_freqs} frequency bins and sampling rate: {self.sr}")
+        # log.info(f"Interpolating from {self.f_min} to {self.f_max} using {self.n_freqs} frequency bins and sampling rate: {self.sr}")
 
     def __call__(self, spec):
         n_fft = (spec.size(2) - 1) * 2

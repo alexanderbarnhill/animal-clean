@@ -65,6 +65,7 @@ class AnimalClean(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         ground_truth = y["ground_truth"]
+        file_names = y["file_name"]
         if self.use_human_speech_augmentation and self.human_speech_loader is not None:
             h_x, h_y = next(iter(self.human_speech_loader))
             h_x = h_x.to(self.device)
@@ -91,27 +92,29 @@ class AnimalClean(pl.LightningModule):
 
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "train")
-        self._set_samples(x, ground_truth, output, "train")
+        self._set_samples(x, ground_truth, output, file_names, "train")
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         ground_truth = y["ground_truth"]
+        file_names = y["file_name"]
         output = self.model(x)
         loss = self.criterion(output, ground_truth)
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "val")
-        self._set_samples(x, ground_truth, output, "val")
+        self._set_samples(x, ground_truth, output, file_names, "val")
         return loss
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         ground_truth = y["ground_truth"]
+        file_names = y["file_name"]
         output = self.model(x)
         loss = self.criterion(output, ground_truth)
         self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "test")
-        self._set_samples(x, ground_truth, output, "test")
+        self._set_samples(x, ground_truth, output, file_names, "test")
         return loss
 
 
@@ -127,21 +130,24 @@ class AnimalClean(pl.LightningModule):
             i = []
             for img_idx in range(samples["input"].shape[0]):
                 image_tensor = samples["input"][img_idx]
-                image = convert_tensor_to_PIL(image_tensor)
+                file_name = samples["file_name"][img_idx]
+                image = convert_tensor_to_PIL(image_tensor, file_name)
                 i.append(image)
             logger.log_image(f"{phase}/Input", i, self.epoch)
 
             i = []
             for img_idx in range(samples["output"].shape[0]):
                 image_tensor = samples["output"][img_idx]
-                image = convert_tensor_to_PIL(image_tensor)
+                file_name = samples["file_name"][img_idx]
+                image = convert_tensor_to_PIL(image_tensor, file_name)
                 i.append(image)
             logger.log_image(f"{phase}/Denoised Output", i, self.epoch)
 
             i = []
             for img_idx in range(samples["ground_truth"].shape[0]):
                 image_tensor = samples["ground_truth"][img_idx]
-                image = convert_tensor_to_PIL(image_tensor)
+                file_name = samples["file_name"][img_idx]
+                image = convert_tensor_to_PIL(image_tensor, file_name)
                 i.append(image)
             logger.log_image(f"{phase}/Ground Truth", i, self.epoch)
 
@@ -151,16 +157,20 @@ class AnimalClean(pl.LightningModule):
             logger.add_images(f"{phase}/Denoised Output", samples["output"], self.epoch, dataformats="NCHW")
             logger.add_images(f"{phase}/Ground Truth", samples["ground_truth"], self.epoch, dataformats="NCHW")
 
-    def _set_samples(self, features, ground_truth, output_samples, phase):
+    def _set_samples(self, features, ground_truth, output_samples, file_names, phase):
         if self.samples is None or phase not in self.samples or "input" not in self.samples[phase]:
             self._initialize_samples()
 
         if self.samples[phase]["input"] is None:
             self.samples[phase]["input"] = features
+
         if self.samples[phase]["ground_truth"] is None:
             self.samples[phase]["ground_truth"] = ground_truth
         if self.samples[phase]["output"] is None:
             self.samples[phase]["output"] = output_samples
+
+        if self.samples[phase]["file_name"] is None:
+            self.samples[phase]["file_name"] = file_names
 
     def _initialize_samples(self):
         log.info(f"Initializing Sample dict")
@@ -169,7 +179,8 @@ class AnimalClean(pl.LightningModule):
             data[phase] = {
                 "input": None,
                 "output": None,
-                "ground_truth": None
+                "ground_truth": None,
+                "file_name": None
             }
 
         self.samples = data

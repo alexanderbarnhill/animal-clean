@@ -81,6 +81,23 @@ def test_masking_data_selection():
     for i in range(x.shape[0]):
         _show(x[i])
 
+
+def test_masking_data_selection_val_test():
+    configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=PARAKEET)
+    configuration.training.batch_size = 4
+    loaders = get_data_loaders(configuration)
+    train_loader = loaders["train"]
+    assert train_loader is not None
+    sample = next(iter(train_loader))
+    assert sample is not None
+    x, y = sample
+    ground_truth = y["ground_truth"]
+    for i in range(ground_truth.shape[0]):
+        _show(ground_truth[i])
+    for i in range(x.shape[0]):
+        _show(x[i])
+
+
 def test_artificial_noise_scaling():
     configuration = build_configuration(defaults_path=CONFIGURATION_BASE, species_configuration=PARAKEET)
     configuration.training.batch_size = 4

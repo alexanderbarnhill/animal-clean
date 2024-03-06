@@ -93,11 +93,12 @@ class AnimalClean(pl.LightningModule):
             all_names = file_names
 
         output = self.model(x)
+        denoised_ground_truth = self.model(ground_truth)
         loss = self.criterion(output, ground_truth)
 
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "train")
-        self._set_samples(x, ground_truth, output, all_names, "train")
+        self._set_samples(x, ground_truth, output, denoised_ground_truth, all_names, "train")
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -105,10 +106,11 @@ class AnimalClean(pl.LightningModule):
         ground_truth = y["ground_truth"]
         file_names = y["file_name"]
         output = self.model(x)
+        denoised_ground_truth = self.model(ground_truth)
         loss = self.criterion(output, ground_truth)
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "val")
-        self._set_samples(x, ground_truth, output, file_names, "val")
+        self._set_samples(x, ground_truth, output, denoised_ground_truth, file_names, "val")
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -116,10 +118,11 @@ class AnimalClean(pl.LightningModule):
         ground_truth = y["ground_truth"]
         file_names = y["file_name"]
         output = self.model(x)
+        denoised_ground_truth = self.model(ground_truth)
         loss = self.criterion(output, ground_truth)
         self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self._log_metrics(output, y, "test")
-        self._set_samples(x, ground_truth, output, file_names, "test")
+        self._set_samples(x, ground_truth, output, denoised_ground_truth, file_names, "test")
         return loss
 
 
@@ -154,6 +157,13 @@ class AnimalClean(pl.LightningModule):
                 file_name = samples["file_name"][img_idx]
                 image = convert_tensor_to_PIL(image_tensor, file_name, resize=False)
                 i.append(image)
+
+            i = []
+            for img_idx in range(samples["denoised_ground_truth"].shape[0]):
+                image_tensor = samples["denoised_ground_truth"][img_idx]
+                file_name = samples["file_name"][img_idx]
+                image = convert_tensor_to_PIL(image_tensor, file_name, resize=False)
+                i.append(image)
             logger.log_image(f"{phase}/Ground Truth", i, self.epoch)
 
         else:
@@ -162,7 +172,7 @@ class AnimalClean(pl.LightningModule):
             logger.add_images(f"{phase}/Denoised Output", samples["output"], self.epoch, dataformats="NCHW")
             logger.add_images(f"{phase}/Ground Truth", samples["ground_truth"], self.epoch, dataformats="NCHW")
 
-    def _set_samples(self, features, ground_truth, output_samples, file_names, phase):
+    def _set_samples(self, features, ground_truth, output_samples, denoised_ground_truth, file_names, phase):
         if self.samples is None or phase not in self.samples or "input" not in self.samples[phase]:
             self._initialize_samples()
 
@@ -171,6 +181,10 @@ class AnimalClean(pl.LightningModule):
 
         if self.samples[phase]["ground_truth"] is None:
             self.samples[phase]["ground_truth"] = ground_truth
+
+        if self.samples[phase]["denoised_ground_truth"] is None:
+            self.samples[phase]["denoised_ground_truth"] = denoised_ground_truth
+
         if self.samples[phase]["output"] is None:
             self.samples[phase]["output"] = output_samples
 
@@ -185,6 +199,7 @@ class AnimalClean(pl.LightningModule):
                 "input": None,
                 "output": None,
                 "ground_truth": None,
+                "denoised_ground_truth": None,
                 "file_name": None
             }
 

@@ -9,10 +9,12 @@
 #SBATCH --signal=SIGUSR1@90
 
 
-while getopts s: flag
+while getopts s:t: flag
 do
     case "${flag}" in
         s) species=${OPTARG};;
+        t) species=${OPTARG};;
+        *) echo "No target selected. Cannot continue"; exit;
     esac
 done
 

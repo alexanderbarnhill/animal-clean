@@ -136,7 +136,7 @@ class AnimalClean(pl.LightningModule):
             for img_idx in range(samples["input"].shape[0]):
                 image_tensor = samples["input"][img_idx]
                 file_name = samples["file_name"][img_idx]
-                image = convert_tensor_to_PIL(image_tensor, file_name)
+                image = convert_tensor_to_PIL(image_tensor, file_name, resize=False)
                 i.append(image)
             logger.log_image(f"{phase}/Input", i, self.epoch)
 
@@ -144,7 +144,7 @@ class AnimalClean(pl.LightningModule):
             for img_idx in range(samples["output"].shape[0]):
                 image_tensor = samples["output"][img_idx]
                 file_name = samples["file_name"][img_idx]
-                image = convert_tensor_to_PIL(image_tensor, file_name)
+                image = convert_tensor_to_PIL(image_tensor, file_name, resize=False)
                 i.append(image)
             logger.log_image(f"{phase}/Denoised Output", i, self.epoch)
 
@@ -152,7 +152,7 @@ class AnimalClean(pl.LightningModule):
             for img_idx in range(samples["ground_truth"].shape[0]):
                 image_tensor = samples["ground_truth"][img_idx]
                 file_name = samples["file_name"][img_idx]
-                image = convert_tensor_to_PIL(image_tensor, file_name)
+                image = convert_tensor_to_PIL(image_tensor, file_name, resize=False)
                 i.append(image)
             logger.log_image(f"{phase}/Ground Truth", i, self.epoch)
 

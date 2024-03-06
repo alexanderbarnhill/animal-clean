@@ -20,7 +20,7 @@ def save_image_tensor(image_tensor, output, transpose=True):
     plt.savefig(output, bbox_inches="tight")
 
 
-def convert_tensor_to_PIL(image_tensor, title, transpose=True):
+def convert_tensor_to_PIL(image_tensor, title=None, transpose=True, resize=True):
     if image_tensor.shape[0] == 1:
         image_tensor = image_tensor[0]
     if transpose:
@@ -32,12 +32,17 @@ def convert_tensor_to_PIL(image_tensor, title, transpose=True):
 
     fig, ax = plt.subplots(dpi=60, figsize=(5, 10))
     ax.imshow(image_tensor, origin="lower", interpolation=None)
-    plt.ylabel(os.path.basename(title), fontsize=10)
+
+    if title is not None:
+        plt.ylabel(os.path.basename(title), fontsize=10)
+    else:
+        plt.axis("off")
     buffer = io.BytesIO()
     plt.savefig(buffer, bbox_inches="tight", pad_inches=0)
     buffer.seek(0)
     image = Image.open(buffer)
-    # image = resize_image(image)
+    if resize:
+        image = resize_image(image)
     plt.close(fig)
     return image
 

@@ -27,7 +27,7 @@ data:
     human_speech:
       clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
       noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.5
+      batch_percentage: 0.0
     working_directory:
     cache_directory:
 
@@ -72,7 +72,7 @@ dataset:
       max_snr: 12
 
     noise_masking:
-      masking_probability: 0.5
+      masking_probability: 1.0
       masking_data: "target"
       df: 15.0
       exp_e: 0.1

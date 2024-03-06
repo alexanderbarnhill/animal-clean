@@ -245,8 +245,8 @@ if __name__ == '__main__':
             detected_spec_cmplx = spec_cmplx.squeeze(dim=0).transpose(0, 1)
 
             if sp is not None:
-                input_name = os.path.join(io, f"net_in_spec_{filename[0].split('/')[-1].split('.')[0]}.png")
-                output_name = os.path.join(oo, f"net_out_spec_{filename[0].split('/')[-1].split('.')[0]}.png")
+                input_name = os.path.join(io, f"{i}_net_in_spec_{filename[0].split('/')[-1].split('.')[0]}.png")
+                output_name = os.path.join(oo, f"{i}_net_out_spec_{filename[0].split('/')[-1].split('.')[0]}.png")
                 input_img = convert_tensor_to_PIL(batch.squeeze(), transpose=True)
                 output_img = convert_tensor_to_PIL(denoised_output.squeeze(), transpose=True)
                 input_img.save(input_name)

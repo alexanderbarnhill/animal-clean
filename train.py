@@ -73,6 +73,11 @@ if __name__ == '__main__':
     else:
         logger = pl_loggers.TensorBoardLogger(save_dir=training_directory)
 
+    train_batch_limitation = 1.0
+    if configuration.training.debugging.active:
+        train_batch_limitation = configuration.training.debugging.limit_train_batch
+        log.info(f"Limiting batch size to {train_batch_limitation}")
+
     trainer = Trainer(
         accelerator="cpu" if not configuration.training.gpu else "gpu",
         log_every_n_steps=1,
@@ -81,7 +86,7 @@ if __name__ == '__main__':
         callbacks=get_callbacks(configuration),
         enable_checkpointing=configuration.training.enable_checkpointing,
         strategy="ddp",
-        limit_train_batches=1.0 if not configuration.training.debugging.active else configuration.training.debugging.limit_train_batch,
+        limit_train_batches=train_batch_limitation,
         accumulate_grad_batches=configuration.training.accumulate_gradient
 
     )

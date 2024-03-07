@@ -26,14 +26,14 @@ data:
     human_speech:
       clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
       noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.25
+      batch_percentage: 0.50
     working_directory:
     cache_directory:
 
 
 training:
   training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate"
-  ckp_path:
+  ckp_path: /net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate/animal-clean-D-compare-primate/compare-primate-H_50-M_100-AUYZ/checkpoints/epoch=15-step=7280.ckpt
 
 dataset:
   sample_rate: 44100
@@ -71,7 +71,7 @@ dataset:
       max_snr: -8
 
     noise_masking:
-      masking_probability: 0.1
+      masking_probability: 1.00
       masking_data: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/orca/signal/AOEC"
       df: 15.0
       exp_e: 0.1

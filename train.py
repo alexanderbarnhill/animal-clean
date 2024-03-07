@@ -98,6 +98,9 @@ if __name__ == '__main__':
     if configuration.training.ckpt_path is not None and os.path.isfile(configuration.training.ckpt_path):
         log.info(f"Loading from checkpoint : {configuration.training.ckpt_path}")
         ckpt_path = configuration.training.ckpt_path
+    elif configuration.training.ckpt_path is not None and not os.path.isfile(configuration.training.ckpt_path):
+        log.info(f"Checkpoint path does not exist: {configuration.training.ckpt_path}")
+        log.info(f"Cannot continue. Starting from scratch.")
     elif configuration.training.ckpt_path is not None and configuration.training.ckpt_path == "last":
         ckpt_path = "last"
         log.info(f"Attempting to resume training from last checkpoint")

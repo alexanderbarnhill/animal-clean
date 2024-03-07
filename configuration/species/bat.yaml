@@ -34,7 +34,7 @@ data:
 
 training:
   training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/bat"
-  ckp_path:
+  ckpt_path:
 
 dataset:
   sample_rate: 256000

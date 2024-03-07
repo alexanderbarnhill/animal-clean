@@ -32,7 +32,7 @@ data:
 
 training:
   training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/parakeet"
-  ckp_path:
+  ckpt_path:
 
 dataset:
   sample_rate: 44100

@@ -33,7 +33,7 @@ data:
 
 training:
   training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate"
-  ckp_path: /net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate/animal-clean-D-compare-primate/compare-primate-H_50-M_100-AUYZ/checkpoints/epoch=15-step=7280.ckpt
+  ckpt_path: /net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate/animal-clean-D-compare-primate/compare-primate-H_50-M_100-AUYZ/checkpoints/epoch=15-step=7280.ckpt
 
 dataset:
   sample_rate: 44100

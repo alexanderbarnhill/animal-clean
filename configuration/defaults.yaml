@@ -22,7 +22,8 @@ training:
   max_epochs: 50
   optimizer: Adam
 
-  batch_size: 16
+  batch_size: 4
+  accumulate_gradient: 4
   num_workers: 0
 
   training_directory:

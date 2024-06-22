@@ -1,3 +1,5 @@
+Last Update (22.06.2024)
+
 # ANIMAL-CLEAN
 An animal-independent deep denoising, segmentation, and classification toolkit
 
@@ -10,6 +12,7 @@ Due to potential differences in directory configurations when training on a comp
 - `cluster`
 
 **ANIMAL--CLEAN automatically looks for the `SLURM_JOB_ID` environment variable to determine if the script is being run in slurm. In this case, the `cluster` settings are used.**
+**_ONlY RELEVANT FOR DATA SETUP_**
 ## Species Configuration
 
 The species [configurations](configuration/species) are available for
@@ -40,6 +43,18 @@ cache_directory: <(optional) directory to cache spectrograms created during trai
 
 ## Training
 Data settings are controlled with the `species` settings (see above).
+
+### [Model Setup](configuration/model.yaml)
+Model parameters are found in `configuration/model.yaml`
+
+### [Scheduling](configuration/scheduling.yaml)
+Scheduling parameters are found in `configuration/scheduling.yaml`
+
+### [Monitoring](configuration/monitoring.yaml)
+Scheduling parameters are found in `configuration/monitoring.yaml`
+
+#### Weights and Biases
+Currently, the only external monitoring platform is WandB. To use, rename `secrets.template.yaml` to `secrets.yaml` and add the API key for your account and project.
 
 ## Prediction
 

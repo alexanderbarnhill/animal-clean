@@ -2,6 +2,7 @@ import os
 from glob import glob
 import random
 import shutil
+import soundfile as sf
 
 EVAL_SRC = "/home/alex/git/animal-clean/docs/"
 NAME_MAP = {
@@ -89,6 +90,16 @@ class AnimalCleanSample:
         return self.make_example()
 
 
+def do_sample_compare(audio_in, audio_out):
+    y, sr = sf.read(audio_in)
+    y2, _ = sf.read(audio_out)
+
+    if len(y2) < len(y):
+        y = y[:len(y2)]
+
+        sf.write(audio_in, y, sr)
+    print("")
+
 def gather_write_samples(t_name, input_data, output_data):
     audio = glob(input_data + "/**/*.wav", recursive=True)
     imgs = glob(input_data + "/**/*.png")
@@ -110,6 +121,7 @@ def gather_write_samples(t_name, input_data, output_data):
         ii = ii[0]
         io = io[0]
         ao = ao[0]
+        do_sample_compare(a, ao)
         sample = AnimalCleanSample(
             img_in=ii,
             img_out=io,
@@ -152,6 +164,7 @@ def make_species_block(name, src, write_target, sample_write_output):
             make_aug_block(name, aug, os.path.join(src, aug), write_target, sample_write_output, f)
         f.write(f"</div>")
     f.close()
+
 
 if __name__ == '__main__':
     targets = [f for f in os.listdir(EVAL_SRC)]

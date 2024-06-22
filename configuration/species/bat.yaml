@@ -6,11 +6,11 @@ name: bat
 
 data:
   local:
-    data_directory: "/media/alex/Datasets/04_animal-clean/training/data/denoising/bat/signal"
+    data_directory:
     noise_sources:
-      train: /media/alex/Datasets/04_animal-clean/training/data/denoising/bat/noise/train
-      val: /media/alex/Datasets/04_animal-clean/training/data/denoising/bat/noise/val
-      test: /media/alex/Datasets/04_animal-clean/training/data/denoising/bat/noise/test
+      train:
+      val:
+      test:
     human_speech:
       clean: ""
       noisy: ""

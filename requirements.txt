@@ -88,7 +88,7 @@ pytest==7.4.3
 python-dateutil==2.8.2
 python-editor==1.0.4
 python-multipart==0.0.6
-pytorch-lightning==2.1.2
+pytorch-lightning==2.2.5
 pytz==2023.3.post1
 PyWavelets==1.4.1
 PyYAML==6.0.1

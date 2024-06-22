@@ -21,6 +21,23 @@ The species [configurations](configuration/species) are available for
 - [Primate](configuration/species/primate.yaml)
 - [Warbler](configuration/species/warbler.yaml)
 
+
+### Data Setup
+Found in the [defaults](configuration/defaults.yaml) (overridden by the species if selected)
+```    
+data_directory: <path to directory with target signals>
+noise_sources:
+  train: <path to directory with noise files for training>
+  val: <path to directory with noise files for validation>
+  test: <path to directory with noise files for testing>
+human_speech:
+  clean: <path to clean human speech files>
+  noisy: <path to noisy human speech files>
+  batch_percentage: <float between 0 and 1 indicating the percentage of the batch which should be filled with human speech>
+working_directory: <(optional) working directory for target signals if paths not absolute> Default: None
+cache_directory: <(optional) directory to cache spectrograms created during training> Default: None
+```
+
 ## Training
 Data settings are controlled with the `species` settings (see above).
 
@@ -31,7 +48,7 @@ Data settings are controlled with the `species` settings (see above).
 ```
 @inproceedings{BarnhillACLEAN:2024,
 	author={Alexander Barnhill and Elmar Nöth and Andreas Maier and Christian Bergler},
-	title={\textbf{{ANIMAL-CLEAN -- A Deep Denoising Toolkit for Animal-Independent Signal Enhancement}}},
+	title={{ANIMAL-CLEAN -- A Deep Denoising Toolkit for Animal-Independent Signal Enhancement}}},
 	year=2024,
 	booktitle={Proc. Interspeech 2024},
 }

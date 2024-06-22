@@ -5,30 +5,35 @@ name: cod
 
 data:
   local:
-    data_directory: "/home/alex/data/animal-vae/training_data/orca/CTDC-12"
+    data_directory:
     noise_sources:
       train:
       val:
       test:
     human_speech:
-      clean: ""
-      noisy: ""
-      batch_percentage: 0.5
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
 
   cluster:
-    data_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/cod/signal"
+    data_directory:
     noise_sources:
-      train: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/cod/noise/train"
-      val: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/cod/noise/val"
-      test: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/cod/noise/test"
+      train:
+      val:
+      test:
     human_speech:
-      clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
-      noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.5
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
+
+
+training:
+  training_directory:
+  ckpt_path:
 
 dataset:
   sample_rate: 4000

@@ -12,28 +12,28 @@ data:
       val:
       test:
     human_speech:
-      clean: ""
-      noisy: ""
-      batch_percentage: 0.0
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
 
   cluster:
-    data_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/signal"
+    data_directory:
     noise_sources:
-      train: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/noise/train"
-      val: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/noise/val"
-      test: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/bat/noise/test"
+      train:
+      val:
+      test:
     human_speech:
-      clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
-      noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.0
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
 
 
 training:
-  training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/bat"
+  training_directory:
   ckpt_path:
 
 dataset:

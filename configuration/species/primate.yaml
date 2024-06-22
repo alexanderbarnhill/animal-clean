@@ -5,38 +5,35 @@ name: compare-primate
 
 data:
   local:
-    data_directory: "/media/alex/Datasets/04_animal-clean/training/data/denoising/primate/signal"
+    data_directory:
     noise_sources:
-      train: /media/alex/Datasets/04_animal-clean/training/data/denoising/primate/noise/train
-      val: /media/alex/Datasets/04_animal-clean/training/data/denoising/primate/noise/val
-      test: /media/alex/Datasets/04_animal-clean/training/data/denoising/primate/noise/test
+      train:
+      val:
+      test:
     human_speech:
-      clean: ""
-      noisy: ""
-      batch_percentage: 0.5
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
 
   cluster:
-    data_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/primate/signal"
+    data_directory:
     noise_sources:
-      train: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/primate/noise/train"
-      val: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/primate/noise/val"
-      test: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/primate/noise/test"
+      train:
+      val:
+      test:
     human_speech:
-      clean: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/clean_trainset_28spk_wav"
-      noisy: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/data/human_speech_augmentation/noisy_trainset_28spk_wav"
-      batch_percentage: 0.50
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
 
 
 training:
-  training_directory: "/net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate"
-  ckpt_path: /net/DeepAL_data/data/AlexBarnhill/animal-clean/training/models/primate/animal-clean-D-compare-primate/compare-primate-H_50-M_100-AUYZ/checkpoints/epoch=15-step=7280.ckpt
-  debugging:
-    active: true
-    limit_train_batch: 0.5
+  training_directory:
+  ckpt_path:
 
 dataset:
   sample_rate: 44100

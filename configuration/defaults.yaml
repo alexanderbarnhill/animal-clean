@@ -1,17 +1,31 @@
 name: default
 data:
   local:
-    data_directory: "/home/alex/data/animal-clean/training/data/orca/signal/AOEC"
+    data_directory:
     noise_sources:
-      train: "/home/alex/data/animal-clean/training/data/orca/noise/train"
-      val: "/home/alex/data/animal-clean/training/data/orca/noise/val"
-      test: "/home/alex/data/animal-clean/training/data/orca/noise/test"
+      train:
+      val:
+      test:
     human_speech:
-      clean: "/home/alex/data/animal-clean/training/data/human_speech/clean_trainset_28spk_wav"
-      noisy: "/home/alex/data/animal-clean/training/data/human_speech/noisy_trainset_28spk_wav"
-      batch_percentage: 0.5
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
     working_directory:
     cache_directory:
+
+  cluster:
+    data_directory:
+    noise_sources:
+      train:
+      val:
+      test:
+    human_speech:
+      clean:
+      noisy:
+      batch_percentage: # between 0-1
+    working_directory:
+    cache_directory:
+
 
 training:
   ckpt_path:

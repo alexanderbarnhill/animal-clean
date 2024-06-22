@@ -3,15 +3,22 @@ from glob import glob
 import random
 import shutil
 
-EVAL_SRC = "/media/alex/Datasets/04_animal-clean/evaluation"
+EVAL_SRC = "/home/alex/git/animal-clean/docs/"
 NAME_MAP = {
     "chimp": "Chimpanzee",
+    "chimpanzee": "Chimpanzee",
     "bat": "Pygmy Pipistrelle",
     "orca": "Killer Whale",
+    "killer-whale": "Killer Whale",
     "parakeet": "Monk Parakeet",
+    "monk-parakeet": "Monk Parakeet",
+    "pygmy-pipistrelle": "Pygmy pipistrelle",
     "primate": "ComParE Primate",
     "warbler": "Blue-/Golden-Winged Warbler",
     "NOISE": "Noise",
+    "noise": "Noise",
+    "target": "Target",
+    "call": "Call",
     "BWWA": "Blue Winged Warbler",
     "GWWA": "Golden Winged Warbler",
     "OTHER_BIRD": "Other Bird",
@@ -21,135 +28,130 @@ NAME_MAP = {
     "other": "Other",
     "AMBIENT": "Ambient",
     "OTHERANIMAL": "Other Animal",
-    "OTHERBAT": "Other Bat"
+    "OTHERBAT": "Other Bat",
+    "human-augmentation": "Human Augmentation Included",
+    "only-target": "Only Target Data"
+
 }
-def make_example(img_in, img_out, audio_in, audio_out):
-    return f"<div class='example'><div class='original'>{make_img_line(img_in)}{make_audio_line(audio_in)}<p>Original Audio</p></div><div class='denoised'>{make_img_line(img_out)}{make_audio_line(audio_out)}<p>Denoised Audio</p></div></div>"
 
-def make_target_examples_block(tuples):
-    s = "<div class='target-examples'>"
-    for t in tuples:
-        s += make_example(t[0], t[1], t[2], t[3])
-    s += "</div>"
-    return s
 
-def make_targets_block(name, tuples):
-    s = f"<h4>{name}</h4>" + make_target_examples_block(tuples)
-    return s
+class AnimalCleanSample:
+    def __init__(self, audio_in, audio_out, img_in, img_out, aug_type, src_dir):
+        self.audio_in = audio_in
+        self.audio_out = audio_out
+        self.img_in = img_in
+        self.img_out = img_out
+        self.aug_type = aug_type
+        self.src_dir = src_dir
+        self.cls = self.get_class()
 
-def make_audio_line(file):
-    return f"<audio controls><source src='{file}' type='audio/wav'></audio>"
+    def get_class(self):
+        cls = os.path.basename(self.audio_in).split("_")[3].split("-")[0]
+        if cls not in NAME_MAP:
+            return self.audio_in.split(".wav")[0]
+        return NAME_MAP[cls]
 
-def make_img_line(file):
-    return f"<img src='{file}' />"
+
+    def make_example(self):
+        return (f"<div class='example'>"
+                f"<div class='original'>"
+                f"{self.make_img_line(self.img_in)}{self.make_audio_line(self.audio_in)}"
+                f"<p>Original Audio</p>"
+                f"</div>"
+                f"<div class='denoised'>{self.make_img_line(self.img_out)}{self.make_audio_line(self.audio_out)}"
+                f"<p>Denoised Audio</p>"
+                f"</div></div>")
+
+    # def make_target_examples_block(self):
+    #     s = "<div class='target-examples'>"
+    #     for t in tuples:
+    #         s += make_example(t[0], t[1], t[2], t[3])
+    #     s += "</div>"
+    #     return s
+
+    # def make_targets_block(self, name, tuples):
+    #     s = f"<h4>{name}</h4>" +make_target_examples_block(tuples)
+    #     return s
+
+    def make_audio_line(self, file):
+        file = file.replace(self.src_dir, '')
+        if file[0] == os.sep:
+            file = file[1:]
+        return f"<audio controls><source src='{file}' type='audio/wav'></audio>"
+
+    def make_img_line(self, file):
+        file = file.replace(self.src_dir, '')
+        if file[0] == os.sep:
+            file = file[1:]
+        return f"<img src='{file}' alt='{os.path.basename(file)}' />"
+
+    def write(self):
+        return self.make_example()
+
+
+def gather_write_samples(t_name, input_data, output_data):
+    audio = glob(input_data + "/**/*.wav", recursive=True)
+    imgs = glob(input_data + "/**/*.png")
+    audio_in = [f for f in audio if "net_in" in f]
+    audio_out = [f for f in audio if "net_out" in f]
+    img_in = [f for f in imgs if "net_in" in f]
+    img_out = [f for f in imgs if "net_out" in f]
+
+    samples = []
+
+    for a in audio_in:
+        pi = "_".join(os.path.basename(a).split("_")[:3])
+        po = pi.replace("_in", "_out")
+        ii = [i for i in img_in if pi in i]
+        io = [i for i in img_out if po in i]
+        ao = [i for i in audio_out if po in i]
+        if len(ii) == 0 or len(io) == 0 or len(ao) == 0:
+            continue
+        ii = ii[0]
+        io = io[0]
+        ao = ao[0]
+        sample = AnimalCleanSample(
+            img_in=ii,
+            img_out=io,
+            audio_out=ao,
+            audio_in=a,
+            aug_type=t_name,
+            src_dir=output_data
+        )
+        samples.append(sample)
+
+    return samples
+
+
+def make_aug_block(name, aug, src, write_target, sample_write_output, f):
+    samples = gather_write_samples(aug, src, sample_write_output)
+    f.write(f"<h3>{NAME_MAP[aug]}</h3>\n")
+    f.write(f"<div class='aug-block'>")
+    clss = list(set([f.cls for f in samples]))
+    for cls in clss:
+        f.write(f"<div class='cls-block'>")
+        f.write(f"<h4>{cls}</h4>")
+
+        cls_samples = [sample for sample in samples if sample.cls == cls]
+
+        for sample in cls_samples:
+            f.write(sample.write())
+        f.write("</div>")
+    f.write(f"</div>")
+
+
 
 def make_species_block(name, src, write_target, sample_write_output):
-    input_data = os.path.join(src, "input_data")
-    output_data = os.path.join(src, "output")
-    if not os.path.isdir(input_data) or not os.path.isdir(output_data):
-        print(f"Skipping {name}")
-        return
 
-    classes = [f for f in os.listdir(input_data)]
-    classes = sorted(classes)
-    if "NOISE" in classes:
-        c_id = classes.index("NOISE")
-        classes.pop(c_id)
-        classes.append("NOISE")
+    augs = [f for f in os.listdir(src)]
     with open(write_target, "a") as f:
-        f.write("<div class='example-block'>")
-        f.write(f"<h3>{NAME_MAP[name]}</h3>")
-        for t in classes:
-            f.write(f"<div class='targets'><h4>{NAME_MAP[t]}</h4>{make_target_examples_block(gather_write_sample_tuples(name, t, input_data, output_data, sample_write_output))}</div>")
-        f.write("</div>")
-        f.close()
-    pass
+        f.write(f"<div class='example-block'>")
+        f.write(f"<h2>{name}</h2>\n")
 
-def gather_write_sample_tuples(t_name, c_name, input_data, output_data, output_dir):
-    in_audio = glob(input_data + "**/**/*.wav", recursive=True)
-    in_audio = [f for f in in_audio if c_name in f]
-    imgs = glob(output_data + "**/**/*.png", recursive=True)
-    out_imgs = [i for i in imgs if "net_out" in i]
-    in_imgs = [i for i in imgs if "net_in" in i]
-    out_audio = glob(output_data + "**/**/*.wav", recursive=True)
-    bases = [os.path.basename(f).replace(".wav", "") for f in in_audio]
-    tuples = []
-
-    source_base_out = os.path.join(t_name, c_name)
-    audio_base_out = os.path.join(source_base_out, "AUDIO")
-    img_base_out = os.path.join(source_base_out, "IMG")
-
-    audio_original_out = os.path.join(audio_base_out, "ORIGINAL")
-    audio_denoised_out = os.path.join(audio_base_out, "DENOISED")
-    img_original_out = os.path.join(img_base_out, "ORIGINAL")
-    img_denoised_out = os.path.join(img_base_out, "DENOISED")
-
-    audio_original_out_full = os.path.join(output_dir, audio_original_out)
-    audio_denoised_out_full = os.path.join(output_dir, audio_denoised_out)
-    img_original_out_full = os.path.join(output_dir, img_original_out)
-    img_denoised_out_full = os.path.join(output_dir, img_denoised_out)
-
-    if os.path.isdir(audio_original_out_full):
-        shutil.rmtree(audio_original_out_full)
-
-    if os.path.isdir(audio_denoised_out_full):
-        shutil.rmtree(audio_denoised_out_full)
-
-    if os.path.isdir(img_original_out_full):
-        shutil.rmtree(img_original_out_full)
-
-    if os.path.isdir(img_denoised_out_full):
-        shutil.rmtree(img_denoised_out_full)
-
-    os.makedirs(audio_original_out_full)
-    os.makedirs(audio_denoised_out_full)
-    os.makedirs(img_original_out_full)
-    os.makedirs(img_denoised_out_full)
-
-    for i in random.sample(in_audio, min(5, len(in_audio))):
-        b = os.path.basename(i).replace(".wav", "")
-        idx = bases.index(b)
-
-        audio_in = in_audio[idx]
-        img_in = None
-        img_out = None
-        audio_out = None
-
-        for img in in_imgs:
-            ib = os.path.basename(img).replace(".png", "")
-            if b in ib:
-                img_in = img
-        for img in out_imgs:
-            ib = os.path.basename(img).replace(".png", "")
-            if b in ib:
-                img_out = img
-
-        for img in out_audio:
-            ib = os.path.basename(img).replace(".wav", "")
-            if b in ib:
-                audio_out = img
-        if img_in is None or img_out is None or audio_out is None:
-            print(f"Skipping {audio_in}")
-            continue
-
-
-        shutil.copy(audio_in, audio_original_out_full)
-        shutil.copy(audio_out, audio_denoised_out_full)
-        shutil.copy(img_in, img_original_out_full)
-        shutil.copy(img_out, img_denoised_out_full)
-
-        tuples.append((
-            os.path.join(img_original_out, os.path.basename(img_in)),
-            os.path.join(img_denoised_out, os.path.basename(img_out)),
-            os.path.join(audio_original_out, os.path.basename(audio_in)),
-            os.path.join(audio_denoised_out, os.path.basename(audio_out)),
-
-        ))
-
-
-
-    return tuples
-
+        for aug in augs:
+            make_aug_block(name, aug, os.path.join(src, aug), write_target, sample_write_output, f)
+        f.write(f"</div>")
+    f.close()
 
 if __name__ == '__main__':
     targets = [f for f in os.listdir(EVAL_SRC)]
@@ -160,4 +162,7 @@ if __name__ == '__main__':
     for target in targets:
         species = target
         target_dir = os.path.join(EVAL_SRC, species)
-        make_species_block(species, target_dir, target_out, "/home/alex/git/animal-clean/docs")
+        if not os.path.isdir(target_dir):
+            print(f"Skipping {target}")
+            continue
+        make_species_block(NAME_MAP[species], target_dir, target_out, "/home/alex/git/animal-clean/docs")

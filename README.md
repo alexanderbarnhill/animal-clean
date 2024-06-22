@@ -14,6 +14,7 @@ Due to potential differences in directory configurations when training on a comp
 **ANIMAL--CLEAN automatically looks for the `SLURM_JOB_ID` environment variable to determine if the script is being run in slurm. In this case, the `cluster` settings are used.**
 **_ONlY RELEVANT FOR DATA SETUP_**
 ## Species Configuration
+The species configurations are based on the settings used in [ANIMAL-SPOT](https://github.com/ChristianBergler/ANIMAL-SPOT).
 
 The species [configurations](configuration/species) are available for
 - [Pygmy pipistrelle](configuration/species/bat.yaml)
@@ -26,6 +27,7 @@ The species [configurations](configuration/species) are available for
 
 
 ### Data Setup
+
 Found in the [defaults](configuration/defaults.yaml) (overridden by the species if selected)
 ```    
 data_directory: <path to directory with target signals>

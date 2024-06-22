@@ -1,0 +1,22 @@
+cuda: true
+batch_size: 1
+num_workers: 0
+visualization:
+  active: true
+  separate_img: true
+  split_in_out: false
+  axes: true
+  img_out:
+
+
+visualize: true
+input: "/media/alex/Datasets/04_animal-clean/evaluation/chimp/input_data"
+output:
+  base: "/media/alex/s1/doc_work/13_ANIMAL-CLEAN/publication/supplementary_material/chimpanzee/only-target"
+  audio: "audio"
+
+copy_source: true
+maintain_directory_structure: false
+file_ext:
+model_path: "/media/alex/Datasets/model_storage/ANIMAL-CLEAN/chimp/chimpanzee-H_0-M_100-FNCJ_last.ckpt"
+sequence_length: 1.28

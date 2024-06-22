@@ -1,0 +1,22 @@
+cuda: true
+batch_size: 1
+num_workers: 0
+visualization:
+  active: true
+  separate_img: true
+  split_in_out: false
+  axes: true
+  img_out:
+
+
+visualize: true
+input: "/media/alex/Datasets/04_animal-clean/evaluation/chimp/input_data"
+output:
+  base: "/media/alex/s1/doc_work/13_ANIMAL-CLEAN/publication/supplementary_material/chimpanzee/human-augmentation"
+  audio: "audio"
+
+copy_source: true
+maintain_directory_structure: false
+file_ext:
+model_path: "/media/alex/Datasets/model_storage/ANIMAL-CLEAN/chimp/CI_H50_M100_YDKY_last.ckpt"
+sequence_length: 1.28

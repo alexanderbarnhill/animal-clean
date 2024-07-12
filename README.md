@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/744415416.svg)](https://zenodo.org/doi/10.5281/zenodo.12733948)
+
 Last Update (22.06.2024)
 
 # ANIMAL-CLEAN

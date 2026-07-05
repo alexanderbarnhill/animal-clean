@@ -225,6 +225,7 @@ if __name__ == '__main__':
                                                freq_compression=compression)
     log.info(f"Data Loader Size: {len(data_loader)}")
 
+    total_audio = None  # clarion-patch: init for StridedAudioDataset concatenate path
     with torch.no_grad():
         for i, b in enumerate(data_loader):
 
